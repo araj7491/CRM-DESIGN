@@ -18,7 +18,7 @@ CRM-DESIGN is a modern Customer Relationship Management (CRM) application design
 ### Installation
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/araj7491/CRM-DESIGN.git
 cd CRM-DESIGN
 
 # Install dependencies
