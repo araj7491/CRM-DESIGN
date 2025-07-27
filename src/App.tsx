@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -31,11 +31,7 @@ import {
   TrendingUp,
   Clock,
   Target,
-  Mail,
-  Calendar,
-  Edit,
-  Trash2,
-  Eye,
+
   Settings,
   Bell,
   User,
@@ -45,8 +41,19 @@ import {
   FileText as QuoteIcon,
   ShoppingBag,
   Square,
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Activity,
+  MessageCircle,
+  CheckSquare,
+  Calendar as CalendarIcon,
+  Mail as MailIcon,
+  FileText as FileIcon,
+  MoreVertical,
 } from 'lucide-react';
 import LeadsTable from './components/LeadsTable';
+import LeadDetails from './components/LeadDetails';
 
 ChartJS.register(
   CategoryScale,
@@ -62,6 +69,7 @@ ChartJS.register(
 
 const App: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(false);
   const [activeSection, setActiveSection] = useState('dashboard');
   const [showLeadModal, setShowLeadModal] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
@@ -76,31 +84,19 @@ const App: React.FC = () => {
   const [showActionMenu, setShowActionMenu] = useState<number | null>(null);
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
+  const [expandedWidgets, setExpandedWidgets] = useState<{ [key: string]: boolean }>({
+    activities: true,
+    notes: true,
+    tasks: true,
+    emails: false,
+    meetings: false,
+  });
 
-  // State for editing fields in lead details
-  const [editFields, setEditFields] = useState<{ [key: string]: boolean }>({});
-  const [editLeadData, setEditLeadData] = useState<any>(null);
-
-  // When opening lead details, initialize editLeadData
-  useEffect(() => {
-    if (showLeadDetails && selectedLead) {
-      setEditLeadData({ ...selectedLead });
-      setEditFields({});
-    }
-  }, [showLeadDetails, selectedLead]);
-
-  const handleEditField = (field: string) => {
-    setEditFields((prev) => ({ ...prev, [field]: true }));
-  };
-
-  const handleFieldChange = (field: string, value: string) => {
-    setEditLeadData((prev: any) => ({ ...prev, [field]: value }));
-  };
-
-  const handleSaveLeadChanges = () => {
-    // Save logic here (e.g., update leads array)
-    setShowLeadDetails(false);
-    setSelectedLead(null);
+  const toggleWidget = (widgetId: string) => {
+    setExpandedWidgets(prev => ({
+      ...prev,
+      [widgetId]: !prev[widgetId]
+    }));
   };
 
   const handleSelectLead = (leadId: number) => {
@@ -186,10 +182,6 @@ const App: React.FC = () => {
       default:
         break;
     }
-  };
-
-  const toggleViewMode = () => {
-    setViewMode(viewMode === 'list' ? 'kanban' : 'list');
   };
 
   // Sample data for demonstration
@@ -406,37 +398,51 @@ const App: React.FC = () => {
   const styles: { [key: string]: React.CSSProperties } = {
     container: {
       display: 'flex',
+      flexDirection: 'column' as const,
       height: '100vh',
       fontFamily: '"Inter", sans-serif',
       backgroundColor: '#ffffff',
+      position: 'relative' as const,
+    },
+    mainLayout: {
+      display: 'flex',
+      marginLeft: sidebarCollapsed ? '50px' : '280px',
+      marginTop: '73px', // Height of header
+      height: 'calc(100vh - 73px)',
+      transition: 'margin-left 0.3s ease',
     },
     sidebar: {
-      width: sidebarCollapsed ? '80px' : '280px',
+      position: 'fixed' as const,
+      left: 0,
+      top: 0,
+      bottom: 0,
+      width: sidebarCollapsed ? '50px' : '280px',
       backgroundColor: '#1e40af',
       color: 'white',
       transition: 'width 0.3s ease',
-      flexShrink: 0,
       borderRight: '1px solid #e5e7eb',
       display: 'flex',
       flexDirection: 'column' as const,
       alignItems: sidebarCollapsed ? 'center' : 'stretch',
+      height: '100vh',
+      zIndex: 90,
     },
     sidebarHeader: {
-      padding: '16px',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+      padding: sidebarCollapsed ? '8px 0' : '16px',
+      borderBottom: sidebarCollapsed ? 'none' : '1px solid rgba(255, 255, 255, 0.1)',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'space-between',
+      justifyContent: sidebarCollapsed ? 'center' : 'space-between',
       gap: '8px',
     },
     logo: {
-      display: 'flex',
+      display: sidebarCollapsed ? 'none' : 'flex',
       alignItems: 'center',
       gap: '8px',
     },
     logoImg: {
-      width: '32px',
-      height: '32px',
+      width: sidebarCollapsed ? '24px' : '32px',
+      height: sidebarCollapsed ? '24px' : '32px',
       display: sidebarCollapsed ? 'none' : 'block',
     },
     logoText: {
@@ -451,13 +457,18 @@ const App: React.FC = () => {
       border: 'none',
       color: 'white',
       cursor: 'pointer',
-      padding: '6px',
+      padding: sidebarCollapsed ? '8px 0' : '6px',
       borderRadius: '4px',
       transition: 'background-color 0.2s',
+      width: sidebarCollapsed ? '34px' : 'auto',
+      height: sidebarCollapsed ? '34px' : 'auto',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     navList: {
       listStyle: 'none',
-      padding: '16px 0',
+      padding: sidebarCollapsed ? '4px 0' : '16px 0',
       margin: 0,
       flex: 1,
       display: 'flex',
@@ -465,7 +476,7 @@ const App: React.FC = () => {
       alignItems: 'center' as React.CSSProperties['alignItems'],
     },
     navItem: {
-      margin: '4px 0',
+      margin: sidebarCollapsed ? '1px 0' : '4px 0',
       width: '100%',
       display: 'flex',
       justifyContent: 'center',
@@ -474,15 +485,15 @@ const App: React.FC = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
-      padding: sidebarCollapsed ? '12px 0' : '10px 16px',
+      padding: sidebarCollapsed ? '8px 0' : '10px 16px',
       color: 'white',
       textDecoration: 'none',
       transition: 'background-color 0.2s',
       cursor: 'pointer',
       backgroundColor: 'transparent',
       border: 'none',
-      width: sidebarCollapsed ? '48px' : '100%',
-      height: '48px',
+      width: sidebarCollapsed ? '34px' : '100%',
+      height: sidebarCollapsed ? '34px' : '48px',
       fontSize: '14px',
     },
     navLinkActive: {
@@ -494,27 +505,28 @@ const App: React.FC = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      width: '24px',
-      height: '24px',
+      width: '20px',
+      height: '20px',
     },
     navText: {
       display: sidebarCollapsed ? 'none' : 'block',
     },
     sidebarFooter: {
-      padding: '16px',
+      padding: sidebarCollapsed ? '8px' : '16px',
       borderTop: '1px solid rgba(255, 255, 255, 0.1)',
     },
     profileSection: {
       display: 'flex',
       alignItems: 'center',
-      padding: '8px 12px',
+      padding: sidebarCollapsed ? '6px' : '8px 12px',
       borderRadius: '8px',
       cursor: 'pointer',
       transition: 'background-color 0.2s',
+      justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
     },
     profileAvatar: {
-      width: '32px',
-      height: '32px',
+      width: sidebarCollapsed ? '24px' : '32px',
+      height: sidebarCollapsed ? '24px' : '32px',
       borderRadius: '50%',
       backgroundColor: 'rgba(255, 255, 255, 0.2)',
       display: 'flex',
@@ -541,6 +553,7 @@ const App: React.FC = () => {
       display: 'flex',
       flexDirection: 'column' as const,
       overflow: 'hidden',
+      width: '100%',
     },
     header: {
       backgroundColor: 'white',
@@ -549,6 +562,12 @@ const App: React.FC = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
+      position: 'fixed' as const,
+      top: 0,
+      left: sidebarCollapsed ? '50px' : '280px',
+      right: 0,
+      zIndex: 80,
+      transition: 'left 0.3s ease',
     },
     headerTitle: {
       fontSize: '22px',
@@ -879,6 +898,129 @@ const App: React.FC = () => {
       width: '100%',
       textAlign: 'left' as const,
     },
+    rightSidebar: {
+      width: rightSidebarCollapsed ? '0' : '320px',
+      backgroundColor: '#f8f9fa',
+      borderLeft: rightSidebarCollapsed ? 'none' : '1px solid #e5e7eb',
+      transition: 'width 0.3s ease',
+      flexShrink: 0,
+      display: 'flex',
+      flexDirection: 'column' as const,
+      position: 'relative' as const,
+      height: '100%',
+      overflow: 'hidden',
+    },
+    rightSidebarHeader: {
+      padding: '16px',
+      borderBottom: '1px solid #e5e7eb',
+      backgroundColor: 'white',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      minHeight: '64px',
+    },
+    rightSidebarTitle: {
+      fontSize: '16px',
+      fontWeight: '600',
+      color: '#1f2937',
+      display: rightSidebarCollapsed ? 'none' : 'block',
+    },
+    rightSidebarContent: {
+      flex: 1,
+      overflow: 'auto',
+      padding: rightSidebarCollapsed ? '8px' : '16px',
+    },
+    widget: {
+      backgroundColor: 'white',
+      borderRadius: '8px',
+      marginBottom: '16px',
+      border: '1px solid #e5e7eb',
+      overflow: 'hidden',
+    },
+    widgetHeader: {
+      padding: '12px 16px',
+      borderBottom: '1px solid #e5e7eb',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      cursor: 'pointer',
+      transition: 'background-color 0.2s',
+    },
+    widgetTitle: {
+      fontSize: '14px',
+      fontWeight: '600',
+      color: '#1f2937',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+    },
+    widgetContent: {
+      padding: '16px',
+    },
+    widgetEmpty: {
+      padding: '24px 16px',
+      textAlign: 'center' as const,
+      color: '#6b7280',
+      fontSize: '13px',
+    },
+    toggleRightSidebarButton: {
+      position: 'absolute' as const,
+      left: rightSidebarCollapsed ? '-32px' : '-1px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      backgroundColor: 'white',
+      border: '1px solid #e5e7eb',
+      borderRadius: rightSidebarCollapsed ? '6px' : '6px 0 0 6px',
+      padding: '8px 4px',
+      cursor: 'pointer',
+      zIndex: 10,
+      boxShadow: '-2px 0 4px rgba(0, 0, 0, 0.05)',
+      transition: 'all 0.3s',
+    },
+    activityItem: {
+      padding: '12px 0',
+      borderBottom: '1px solid #f3f4f6',
+      fontSize: '13px',
+      color: '#374151',
+    },
+    activityTime: {
+      fontSize: '12px',
+      color: '#6b7280',
+      marginBottom: '4px',
+    },
+    noteItem: {
+      padding: '12px',
+      backgroundColor: '#f9fafb',
+      borderRadius: '6px',
+      marginBottom: '8px',
+      fontSize: '13px',
+    },
+    taskItem: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: '8px',
+      padding: '8px 0',
+      fontSize: '13px',
+    },
+    taskCheckbox: {
+      marginTop: '2px',
+    },
+    addButton: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
+      padding: '8px 12px',
+      backgroundColor: '#3b82f6',
+      color: 'white',
+      border: 'none',
+      borderRadius: '6px',
+      fontSize: '13px',
+      fontWeight: '500',
+      cursor: 'pointer',
+      transition: 'background-color 0.2s',
+      width: '100%',
+      justifyContent: 'center',
+    },
   };
 
   const getStatusStyle = (status: string) => {
@@ -937,7 +1079,7 @@ const App: React.FC = () => {
                     }
                   }}
                 >
-                  <Icon size={20} style={styles.navIcon} />
+                  <Icon size={sidebarCollapsed ? 16 : 20} style={styles.navIcon} />
                   <span style={styles.navText}>{item.label}</span>
                 </button>
               </li>
@@ -957,136 +1099,187 @@ const App: React.FC = () => {
             }}
           >
             <div style={styles.profileAvatar}>
-              <User size={18} />
+              <User size={sidebarCollapsed ? 12 : 18} />
             </div>
             <div style={styles.profileInfo}>
               <div style={styles.profileName}>John Doe</div>
               <div style={styles.profileRole}>Admin</div>
             </div>
-            <Settings size={16} style={{display: sidebarCollapsed ? 'none' : 'block'}} />
+            <Settings size={sidebarCollapsed ? 12 : 16} style={{display: sidebarCollapsed ? 'none' : 'block'}} />
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div style={styles.main}>
-        {/* Header */}
-        <div style={styles.header}>
+      {/* Header */}
+      <div style={styles.header}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <h1 style={styles.headerTitle}>
             {navItems.find(item => item.id === activeSection)?.label || 'Dashboard'}
           </h1>
-          <div style={styles.headerActions}>
-            <div style={styles.dropdownContainer}>
-              <button
-                style={styles.button}
-                onClick={() => setShowQuickActions(!showQuickActions)}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#2563eb';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#3b82f6';
-                }}
-              >
-                <Plus size={16} />
-                Quick Actions
-                <ChevronDown size={14} />
-              </button>
-              {showQuickActions && (
-                <div style={styles.dropdownMenu}>
-                  <button
-                    style={styles.dropdownItem}
-                    onClick={() => {
-                      setShowLeadModal(true);
-                      setShowQuickActions(false);
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#f3f4f6';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    <UserPlus size={16} />
-                    Create New Lead
-                  </button>
-                  <button
-                    style={styles.dropdownItem}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#f3f4f6';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    <User size={16} />
-                    Add New Contact
-                  </button>
-                  <button
-                    style={styles.dropdownItem}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#f3f4f6';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    <Building2 size={16} />
-                    Add New Company
-                  </button>
-                  <button
-                    style={styles.dropdownItem}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#f3f4f6';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    <HeartHandshake size={16} />
-                    Create New Deal
-                  </button>
-                  <button
-                    style={styles.dropdownItem}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#f3f4f6';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    <QuoteIcon size={16} />
-                    Create Quote
-                  </button>
-                  <button
-                    style={styles.dropdownItem}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#f3f4f6';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    <ShoppingBag size={16} />
-                    Create Order
-                  </button>
-                </div>
-              )}
-            </div>
+          {/* Back button for lead details */}
+          {activeSection === 'leads' && showLeadDetails && selectedLead && (
             <button
-              style={styles.iconButton}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 12px',
+                backgroundColor: '#f1f5f9',
+                border: 'none',
+                borderRadius: '6px',
+                color: '#475569',
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: '500',
+                transition: 'all 0.2s',
+                width: 'fit-content'
+              }}
+              onClick={handleBackToLeads}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f3f4f6';
-                e.currentTarget.style.color = '#3b82f6';
+                e.currentTarget.style.backgroundColor = '#e2e8f0';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#6b7280';
+                e.currentTarget.style.backgroundColor = '#f1f5f9';
               }}
             >
-              <Bell size={18} />
+              <ArrowLeft size={14} />
+              Back to Leads
             </button>
-          </div>
+          )}
         </div>
+        <div style={styles.headerActions}>
+          <div style={styles.dropdownContainer}>
+            <button
+              style={styles.button}
+              onClick={() => setShowQuickActions(!showQuickActions)}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#2563eb';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#3b82f6';
+              }}
+            >
+              <Plus size={16} />
+              Quick Actions
+              <ChevronDown size={14} />
+            </button>
+            {showQuickActions && (
+              <div style={styles.dropdownMenu}>
+                <button
+                  style={styles.dropdownItem}
+                  onClick={() => {
+                    setShowLeadModal(true);
+                    setShowQuickActions(false);
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                >
+                  <UserPlus size={16} />
+                  Create New Lead
+                </button>
+                <button
+                  style={styles.dropdownItem}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                >
+                  <User size={16} />
+                  Add New Contact
+                </button>
+                <button
+                  style={styles.dropdownItem}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                >
+                  <Building2 size={16} />
+                  Add New Company
+                </button>
+                <button
+                  style={styles.dropdownItem}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                >
+                  <HeartHandshake size={16} />
+                  Create New Deal
+                </button>
+                <button
+                  style={styles.dropdownItem}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                >
+                  <QuoteIcon size={16} />
+                  Create Quote
+                </button>
+                <button
+                  style={styles.dropdownItem}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                >
+                  <ShoppingBag size={16} />
+                  Create Order
+                </button>
+              </div>
+            )}
+          </div>
+          <button
+            style={styles.iconButton}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f3f4f6';
+              e.currentTarget.style.color = '#3b82f6';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#6b7280';
+            }}
+          >
+            <Bell size={16} />
+          </button>
+          <button
+            style={styles.iconButton}
+            onClick={() => setRightSidebarCollapsed(!rightSidebarCollapsed)}
+            title={rightSidebarCollapsed ? "Expand widgets" : "Collapse widgets"}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f3f4f6';
+              e.currentTarget.style.color = '#3b82f6';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#6b7280';
+            }}
+          >
+            {rightSidebarCollapsed ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Main Layout */}
+      <div style={styles.mainLayout}>
+
+      {/* Main Content */}
+      <div style={styles.main}>
 
         {/* Content */}
         <div style={styles.content}>
@@ -1731,7 +1924,7 @@ const App: React.FC = () => {
                     e.currentTarget.style.backgroundColor = '#f3f4f6';
                   }}
                 >
-                  <ArrowUpDown size={16} style={{transform: 'rotate(90deg)'}} />
+                  <ArrowLeft size={16} />
                   Back to Leads
                 </button>
               </div>
@@ -2053,116 +2246,16 @@ const App: React.FC = () => {
 
           {/* Lead Details Page */}
           {activeSection === 'leads' && showLeadDetails && selectedLead && (
-            <div style={styles.card}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                borderBottom: '1px solid #e5e7eb',
-                paddingBottom: '16px',
-                marginBottom: '24px',
-              }}>
-                <h2 style={{
-                  fontSize: '2rem',
-                  fontWeight: 700,
-                  color: '#111',
-                  margin: 0,
-                  letterSpacing: '0.5px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}>{editLeadData?.name}</h2>
-                <button
-                  style={styles.backButton}
-                  onClick={handleBackToLeads}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#e5e7eb';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f3f4f6';
-                  }}
-                >
-                  <ArrowUpDown size={16} style={{transform: 'rotate(90deg)'}} />
-                  Back to Leads
-                </button>
-              </div>
-              <div style={styles.form}>
-                {[
-                  { label: 'First Name', field: 'firstName' },
-                  { label: 'Last Name', field: 'lastName' },
-                  { label: 'Company', field: 'company' },
-                  { label: 'Email', field: 'email' },
-                  { label: 'Phone', field: 'phone' },
-                  { label: 'Status', field: 'status', isStatus: true },
-                  { label: 'Estimated Value', field: 'value', isCurrency: true },
-                  { label: 'Source', field: 'source' },
-                  { label: 'Created Date', field: 'created' },
-                  { label: 'Assigned To', field: 'assignedTo' },
-                  { label: 'Priority', field: 'priority' },
-                  { label: 'Description', field: 'description', isTextarea: true },
-                  { label: 'Notes', field: 'notes', isTextarea: true },
-                  { label: 'Tags', field: 'tags' },
-                ].map(({ label, field, isStatus, isCurrency, isTextarea }) => (
-                  <div style={styles.formGroup} key={field}>
-                    <label style={styles.label}>{label}</label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
-                      {editFields[field] ? (
-                        isTextarea ? (
-                          <textarea
-                            style={{ ...styles.input, minHeight: '60px', flex: 1 }}
-                            value={editLeadData?.[field] || ''}
-                            onChange={e => handleFieldChange(field, e.target.value)}
-                          />
-                        ) : (
-                          <input
-                            style={{ ...styles.input, flex: 1 }}
-                            type={isCurrency ? 'number' : 'text'}
-                            value={editLeadData?.[field] || ''}
-                            onChange={e => handleFieldChange(field, e.target.value)}
-                          />
-                        )
-                      ) : (
-                        <>
-                          <div style={{
-                            ...(isStatus ? getStatusStyle(editLeadData?.[field]) : styles.input),
-                            flex: 1,
-                            marginRight: 0,
-                          }}>
-                            {isCurrency
-                              ? `$${Number(editLeadData?.[field] || 0).toLocaleString()}`
-                              : (editLeadData?.[field] || (field === 'assignedTo' ? 'N/A' : field === 'description' || field === 'notes' || field === 'tags' ? `No ${label.toLowerCase()} provided.` : ''))}
-                          </div>
-                          {field !== 'name' && (
-                            <button
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                marginLeft: 8,
-                                display: 'flex',
-                                alignItems: 'center',
-                                height: '100%',
-                              }}
-                              onClick={() => handleEditField(field)}
-                            >
-                              <Edit size={16} />
-                            </button>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div style={styles.formActions}>
-                <button
-                  style={styles.button}
-                  onClick={handleSaveLeadChanges}
-                >
-                  Save Changes
-                </button>
-              </div>
-            </div>
+            <LeadDetails
+              lead={selectedLead}
+              onBack={handleBackToLeads}
+              onSave={(updatedLead) => {
+                setLeads(leads.map(lead => 
+                  lead.id === updatedLead.id ? updatedLead : lead
+                ));
+                setSelectedLead(updatedLead);
+              }}
+            />
           )}
 
           {/* Other sections placeholder */}
@@ -2301,6 +2394,279 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
+
+        {/* Right Sidebar */}
+        <div style={styles.rightSidebar}>
+        {/* Toggle Button */}
+        <button
+          style={styles.toggleRightSidebarButton}
+          onClick={() => setRightSidebarCollapsed(!rightSidebarCollapsed)}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-50%) translateX(-2px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(-50%)';
+          }}
+        >
+          {rightSidebarCollapsed ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+        </button>
+
+        {/* Header */}
+        <div style={styles.rightSidebarHeader}>
+          <h3 style={styles.rightSidebarTitle}>Widgets</h3>
+          {!rightSidebarCollapsed && (
+            <button
+              style={styles.iconButton}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f3f4f6';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+            >
+              <MoreVertical size={16} />
+            </button>
+          )}
+        </div>
+
+        {/* Content */}
+        <div style={styles.rightSidebarContent}>
+          {/* Activities Widget */}
+          <div style={styles.widget}>
+            <div 
+              style={styles.widgetHeader}
+              onClick={() => toggleWidget('activities')}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f9fafb';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+            >
+              <div style={styles.widgetTitle}>
+                <Activity size={16} />
+                {!rightSidebarCollapsed && 'Recent Activities'}
+              </div>
+              {!rightSidebarCollapsed && (
+                <ChevronDown 
+                  size={16} 
+                  style={{
+                    transform: expandedWidgets.activities ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s'
+                  }}
+                />
+              )}
+            </div>
+            {expandedWidgets.activities && !rightSidebarCollapsed && (
+              <div style={styles.widgetContent}>
+                <div style={styles.activityItem}>
+                  <div style={styles.activityTime}>2 hours ago</div>
+                  <div>Call scheduled with John Smith</div>
+                </div>
+                <div style={styles.activityItem}>
+                  <div style={styles.activityTime}>5 hours ago</div>
+                  <div>Email sent to Tech Corp</div>
+                </div>
+                <div style={styles.activityItem}>
+                  <div style={styles.activityTime}>Yesterday</div>
+                  <div>Meeting completed with Sarah Johnson</div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Notes Widget */}
+          <div style={styles.widget}>
+            <div 
+              style={styles.widgetHeader}
+              onClick={() => toggleWidget('notes')}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f9fafb';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+            >
+              <div style={styles.widgetTitle}>
+                <MessageCircle size={16} />
+                {!rightSidebarCollapsed && 'Notes'}
+              </div>
+              {!rightSidebarCollapsed && (
+                <ChevronDown 
+                  size={16} 
+                  style={{
+                    transform: expandedWidgets.notes ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s'
+                  }}
+                />
+              )}
+            </div>
+            {expandedWidgets.notes && !rightSidebarCollapsed && (
+              <div style={styles.widgetContent}>
+                <div style={styles.noteItem}>
+                  <strong>Important:</strong> Follow up on Tech Corp proposal by Friday
+                </div>
+                <div style={styles.noteItem}>
+                  Customer interested in premium features, schedule demo
+                </div>
+                <button 
+                  style={styles.addButton}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#2563eb';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#3b82f6';
+                  }}
+                >
+                  <Plus size={14} />
+                  Add Note
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Tasks Widget */}
+          <div style={styles.widget}>
+            <div 
+              style={styles.widgetHeader}
+              onClick={() => toggleWidget('tasks')}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f9fafb';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+            >
+              <div style={styles.widgetTitle}>
+                <CheckSquare size={16} />
+                {!rightSidebarCollapsed && 'Tasks'}
+              </div>
+              {!rightSidebarCollapsed && (
+                <ChevronDown 
+                  size={16} 
+                  style={{
+                    transform: expandedWidgets.tasks ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s'
+                  }}
+                />
+              )}
+            </div>
+            {expandedWidgets.tasks && !rightSidebarCollapsed && (
+              <div style={styles.widgetContent}>
+                <div style={styles.taskItem}>
+                  <input type="checkbox" style={styles.taskCheckbox} />
+                  <div>
+                    <div>Review Q4 sales report</div>
+                    <div style={{fontSize: '12px', color: '#6b7280'}}>Due tomorrow</div>
+                  </div>
+                </div>
+                <div style={styles.taskItem}>
+                  <input type="checkbox" style={styles.taskCheckbox} />
+                  <div>
+                    <div>Prepare presentation for board meeting</div>
+                    <div style={{fontSize: '12px', color: '#6b7280'}}>Due in 3 days</div>
+                  </div>
+                </div>
+                <div style={styles.taskItem}>
+                  <input type="checkbox" checked style={styles.taskCheckbox} />
+                  <div style={{textDecoration: 'line-through', color: '#9ca3af'}}>
+                    <div>Send follow-up emails</div>
+                    <div style={{fontSize: '12px'}}>Completed</div>
+                  </div>
+                </div>
+                <button 
+                  style={{...styles.addButton, marginTop: '8px'}}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#2563eb';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#3b82f6';
+                  }}
+                >
+                  <Plus size={14} />
+                  Add Task
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Emails Widget */}
+          <div style={styles.widget}>
+            <div 
+              style={styles.widgetHeader}
+              onClick={() => toggleWidget('emails')}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f9fafb';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+            >
+              <div style={styles.widgetTitle}>
+                <MailIcon size={16} />
+                {!rightSidebarCollapsed && 'Recent Emails'}
+              </div>
+              {!rightSidebarCollapsed && (
+                <ChevronDown 
+                  size={16} 
+                  style={{
+                    transform: expandedWidgets.emails ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s'
+                  }}
+                />
+              )}
+            </div>
+            {expandedWidgets.emails && !rightSidebarCollapsed && (
+              <div style={styles.widgetEmpty}>
+                No recent emails
+              </div>
+            )}
+          </div>
+
+          {/* Meetings Widget */}
+          <div style={styles.widget}>
+            <div 
+              style={styles.widgetHeader}
+              onClick={() => toggleWidget('meetings')}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f9fafb';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+            >
+              <div style={styles.widgetTitle}>
+                <CalendarIcon size={16} />
+                {!rightSidebarCollapsed && 'Upcoming Meetings'}
+              </div>
+              {!rightSidebarCollapsed && (
+                <ChevronDown 
+                  size={16} 
+                  style={{
+                    transform: expandedWidgets.meetings ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s'
+                  }}
+                />
+              )}
+            </div>
+            {expandedWidgets.meetings && !rightSidebarCollapsed && (
+              <div style={styles.widgetContent}>
+                <div style={styles.activityItem}>
+                  <div style={{fontWeight: '500'}}>Product Demo</div>
+                  <div style={styles.activityTime}>Tomorrow at 2:00 PM</div>
+                  <div style={{fontSize: '12px', color: '#6b7280'}}>With Innovation Labs team</div>
+                </div>
+                <div style={styles.activityItem}>
+                  <div style={{fontWeight: '500'}}>Sales Review</div>
+                  <div style={styles.activityTime}>Friday at 10:00 AM</div>
+                  <div style={{fontSize: '12px', color: '#6b7280'}}>Internal meeting</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      </div>
 
       {/* Click outside to close dropdown */}
       {showQuickActions && (
