@@ -53,6 +53,8 @@ import {
 } from 'lucide-react';
 import LeadsTable from './modules/Leads/LeadsTable';
 import LeadDetails from './modules/Leads/LeadDetails';
+import AccountsTable from './modules/Accounts/AccountsTable';
+import AccountDetails from './modules/Accounts/AccountDetails';
 import ContactsTable from './modules/Contacts/ContactsTable';
 import ContactDetails from './modules/Contacts/ContactDetails';
 
@@ -81,6 +83,10 @@ const App: React.FC = () => {
   const [showContactDetails, setShowContactDetails] = useState(false);
   const [selectedContacts, setSelectedContacts] = useState<number[]>([]);
   const [showContactActionMenu, setShowContactActionMenu] = useState<number | null>(null);
+  const [selectedAccount, setSelectedAccount] = useState<any>(null);
+  const [showAccountDetails, setShowAccountDetails] = useState(false);
+  const [selectedAccounts, setSelectedAccounts] = useState<number[]>([]);
+  const [showAccountActionMenu, setShowAccountActionMenu] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('');
   const [sortDirection, setSortDirection] = useState('asc');
@@ -160,6 +166,22 @@ const App: React.FC = () => {
         setSortField('company');
         setSortDirection('desc');
         break;
+      case 'industry-asc':
+        setSortField('industry');
+        setSortDirection('asc');
+        break;
+      case 'industry-desc':
+        setSortField('industry');
+        setSortDirection('desc');
+        break;
+      case 'owner-asc':
+        setSortField('owner');
+        setSortDirection('asc');
+        break;
+      case 'owner-desc':
+        setSortField('owner');
+        setSortDirection('desc');
+        break;
       case 'value-asc':
         setSortField('value');
         setSortDirection('asc');
@@ -220,6 +242,20 @@ const App: React.FC = () => {
     { id: 8, name: 'Jennifer Martinez', account: 'Blue Ocean', email: 'jennifer@blueocean.com', phone: '+1-555-0130', owner: 'Sarah Johnson', created: '2024-01-08' },
     { id: 9, name: 'Daniel Garcia', account: 'Blackstone', email: 'daniel@blackstone.com', phone: '+1-555-0131', owner: 'Mike Wilson', created: '2024-01-07' },
     { id: 10, name: 'Stephanie Taylor', account: 'Red Solutions', email: 'stephanie@redsolutions.com', phone: '+1-555-0132', owner: 'David Brown', created: '2024-01-06' }
+  ]);
+
+  // Sample accounts data
+  const [accounts, setAccounts] = useState([
+    { id: 1, name: 'Tech Corp', industry: 'Technology', owner: 'Sarah Johnson', phone: '+1-555-0123', website: 'https://techcorp.com', created: '2024-01-15' },
+    { id: 2, name: 'Innovation Labs', industry: 'Research & Development', owner: 'Mike Wilson', phone: '+1-555-0124', website: 'https://innovlabs.com', created: '2024-01-14' },
+    { id: 3, name: 'StartupXYZ', industry: 'Software', owner: 'Sarah Johnson', phone: '+1-555-0125', website: 'https://startupxyz.com', created: '2024-01-13' },
+    { id: 4, name: 'Global Solutions', industry: 'Consulting', owner: 'David Brown', phone: '+1-555-0126', website: 'https://globalsol.com', created: '2024-01-12' },
+    { id: 5, name: 'Digital Agency', industry: 'Marketing', owner: 'Sarah Johnson', phone: '+1-555-0127', website: 'https://digitalag.com', created: '2024-01-11' },
+    { id: 6, name: 'Eco Ventures', industry: 'Environmental', owner: 'Mike Wilson', phone: '+1-555-0128', website: 'https://ecoventures.com', created: '2024-01-10' },
+    { id: 7, name: 'FinTech Ltd', industry: 'Financial Services', owner: 'David Brown', phone: '+1-555-0129', website: 'https://fintech.com', created: '2024-01-09' },
+    { id: 8, name: 'Blue Ocean', industry: 'Manufacturing', owner: 'Sarah Johnson', phone: '+1-555-0130', website: 'https://blueocean.com', created: '2024-01-08' },
+    { id: 9, name: 'Blackstone', industry: 'Real Estate', owner: 'Mike Wilson', phone: '+1-555-0131', website: 'https://blackstone.com', created: '2024-01-07' },
+    { id: 10, name: 'Red Solutions', industry: 'Technology', owner: 'David Brown', phone: '+1-555-0132', website: 'https://redsolutions.com', created: '2024-01-06' }
   ]);
 
   const [newLead, setNewLead] = useState({
@@ -459,6 +495,52 @@ const App: React.FC = () => {
 
   const handleContactSort = (field: string) => {
     console.log('Sort contacts by:', field);
+  };
+
+  // Account handlers
+  const handleAccountClick = (account: any) => {
+    setSelectedAccount(account);
+    setShowAccountDetails(true);
+  };
+
+  const handleBackToAccounts = () => {
+    setShowAccountDetails(false);
+    setSelectedAccount(null);
+  };
+
+  const handleAccountActionClick = (action: string, account: any) => {
+    if (action === 'view') {
+      handleAccountClick(account);
+    } else if (action === 'edit') {
+      console.log('Edit account:', account);
+    } else if (action === 'delete') {
+      setAccounts(accounts.filter(a => a.id !== account.id));
+    }
+    setShowAccountActionMenu(null);
+  };
+
+  const handleSelectAccount = (accountId: number) => {
+    if (selectedAccounts.includes(accountId)) {
+      setSelectedAccounts(selectedAccounts.filter(id => id !== accountId));
+    } else {
+      setSelectedAccounts([...selectedAccounts, accountId]);
+    }
+  };
+
+  const handleSelectAllAccounts = () => {
+    if (selectedAccounts.length === accounts.length) {
+      setSelectedAccounts([]);
+    } else {
+      setSelectedAccounts(accounts.map(account => account.id));
+    }
+  };
+
+  const handleAccountActionMenuClick = (accountId: number) => {
+    setShowAccountActionMenu(showAccountActionMenu === accountId ? null : accountId);
+  };
+
+  const handleAccountSort = (field: string) => {
+    console.log('Sort accounts by:', field);
   };
 
   const styles: { [key: string]: React.CSSProperties } = {
@@ -1221,9 +1303,10 @@ const App: React.FC = () => {
       {/* Header */}
       <div style={styles.header}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-          {/* Show back button inline with title only on leads/contacts details page */}
+          {/* Show back button inline with title only on leads/contacts/accounts details page */}
           {((activeSection === 'leads' && showLeadDetails && selectedLead) || 
-            (activeSection === 'contacts' && showContactDetails && selectedContact)) && (
+            (activeSection === 'contacts' && showContactDetails && selectedContact) ||
+            (activeSection === 'accounts' && showAccountDetails && selectedAccount)) && (
             <button
               style={{
                 display: 'flex',
@@ -1246,6 +1329,8 @@ const App: React.FC = () => {
                   handleBackToLeads();
                 } else if (activeSection === 'contacts') {
                   handleBackToContacts();
+                } else if (activeSection === 'accounts') {
+                  handleBackToAccounts();
                 }
               }}
               onMouseEnter={(e) => {
@@ -1254,15 +1339,15 @@ const App: React.FC = () => {
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
               }}
-              title={activeSection === 'leads' ? "Back to Leads" : "Back to Contacts"}
+              title={activeSection === 'leads' ? "Back to Leads" : 
+                     activeSection === 'contacts' ? "Back to Contacts" : "Back to Accounts"}
             >
               <ArrowLeft size={14} />
             </button>
           )}
           
           <h1 style={styles.headerTitle}>
-            {(activeSection === 'contacts' && showContactDetails && selectedContact) ? selectedContact.name :
-             navItems.find(item => item.id === activeSection)?.label || 'Dashboard'}
+            {navItems.find(item => item.id === activeSection)?.label || 'Dashboard'}
           </h1>
         </div>
         <div style={styles.headerActions}>
@@ -2543,8 +2628,335 @@ const App: React.FC = () => {
             />
           )}
 
+          {/* Accounts Section */}
+          {activeSection === 'accounts' && !showAccountDetails && (
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
+                <h3 style={styles.cardTitle}>Accounts Management</h3>
+                <button
+                  style={styles.button}
+                  onClick={() => console.log('Create account')}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#2563eb';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#3b82f6';
+                  }}
+                >
+                  <Plus size={16} />
+                  Create New Account
+                </button>
+              </div>
+
+              {/* Table Controls */}
+              <div style={styles.tableControls}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                  <Search size={16} color="#6b7280" />
+                  <input
+                    type="text"
+                    placeholder="Search accounts..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={styles.searchInput}
+                  />
+                </div>
+                <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                  <Filter size={16} color="#6b7280" />
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    style={styles.select}
+                  >
+                    <option value="all">All Industry</option>
+                    <option value="Technology">Technology</option>
+                    <option value="Research & Development">Research & Development</option>
+                    <option value="Software">Software</option>
+                    <option value="Consulting">Consulting</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Environmental">Environmental</option>
+                    <option value="Financial Services">Financial Services</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Real Estate">Real Estate</option>
+                  </select>
+                </div>
+                <div style={{display: 'flex', alignItems: 'center', gap: '8px', position: 'relative'}}>
+                  <ArrowUpDown size={16} color="#6b7280" />
+                  <button
+                    style={{
+                      ...styles.select,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      backgroundColor: 'white',
+                      border: '1px solid #d1d5db',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                    }}
+                    onClick={() => setShowSortMenu(!showSortMenu)}
+                  >
+                    Sort
+                    <ChevronDown size={14} />
+                  </button>
+                  {showSortMenu && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      backgroundColor: 'white',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                      border: '1px solid #e5e7eb',
+                      minWidth: '200px',
+                      zIndex: 1000,
+                      marginTop: '4px',
+                    }}>
+                      <div style={{padding: '8px 16px', fontSize: '12px', color: '#6b7280', borderBottom: '1px solid #e5e7eb'}}>
+                        Sort by Name
+                      </div>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('name-asc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        A to Z
+                      </button>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('name-desc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        Z to A
+                      </button>
+                      <div style={{padding: '8px 16px', fontSize: '12px', color: '#6b7280', borderBottom: '1px solid #e5e7eb'}}>
+                        Sort by Industry
+                      </div>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('industry-asc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        A to Z
+                      </button>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('industry-desc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        Z to A
+                      </button>
+                      <div style={{padding: '8px 16px', fontSize: '12px', color: '#6b7280', borderBottom: '1px solid #e5e7eb'}}>
+                        Sort by Owner
+                      </div>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('owner-asc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        A to Z
+                      </button>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('owner-desc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        Z to A
+                      </button>
+                      <div style={{padding: '8px 16px', fontSize: '12px', color: '#6b7280', borderBottom: '1px solid #e5e7eb'}}>
+                        Sort by Date
+                      </div>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('date-asc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        Oldest First
+                      </button>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('date-desc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        Newest First
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <AccountsTable
+                accounts={accounts}
+                selectedAccounts={selectedAccounts}
+                showActionMenu={showAccountActionMenu}
+                onSelectAccount={handleSelectAccount}
+                onSelectAllAccounts={handleSelectAllAccounts}
+                onActionMenuClick={handleAccountActionMenuClick}
+                onActionClick={handleAccountActionClick}
+                onAccountClick={handleAccountClick}
+                onSort={handleAccountSort}
+                styles={styles}
+              />
+            </div>
+          )}
+          {/* Account Details Page */}
+          {activeSection === 'accounts' && showAccountDetails && selectedAccount && (
+            <AccountDetails
+              account={selectedAccount}
+              onBack={handleBackToAccounts}
+              onSave={(updatedAccount) => {
+                setAccounts(accounts.map(account => 
+                  account.id === updatedAccount.id ? updatedAccount : account
+                ));
+                setSelectedAccount(updatedAccount);
+              }}
+            />
+          )}
           {/* Other sections placeholder */}
-          {activeSection !== 'dashboard' && activeSection !== 'leads' && activeSection !== 'contacts' && (
+          {activeSection !== 'dashboard' && activeSection !== 'leads' && activeSection !== 'contacts' && activeSection !== 'accounts' && (
             <div style={styles.card}>
               <h3 style={styles.cardTitle}>
                 {navItems.find(item => item.id === activeSection)?.label} Section

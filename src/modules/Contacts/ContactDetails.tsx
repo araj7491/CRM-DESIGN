@@ -46,7 +46,6 @@ interface ContactDetailsProps {
 
 const ContactDetails: React.FC<ContactDetailsProps> = ({ contact, onBack, onSave }) => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [hoveredStageIndex, setHoveredStageIndex] = useState<number | null>(null);
   
   // Task management state
   const [tasks, setTasks] = useState([
@@ -131,43 +130,18 @@ const ContactDetails: React.FC<ContactDetailsProps> = ({ contact, onBack, onSave
     taskType: 'Follow Up'
   });
 
-  // Pipeline/relationship stages for contacts
-  const relationshipStages = [
-    { id: 'Cold', label: 'Cold', number: 1 },
-    { id: 'Warm', label: 'Warm', number: 2 },
-    { id: 'Hot', label: 'Hot', number: 3 },
-    { id: 'Active', label: 'Active', number: 4 },
-    { id: 'Champion', label: 'Champion', number: 5 }
-  ];
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
+    { id: 'opportunities', label: 'Opportunities', icon: HeartHandshake },
     { id: 'emails', label: 'E-mails', icon: Mail },
     { id: 'calls', label: 'Calls', icon: Phone },
     { id: 'meetings', label: 'Meetings', icon: Video },
     { id: 'tasks', label: 'Tasks', icon: CheckCircle },
-    { id: 'opportunities', label: 'Opportunities', icon: HeartHandshake },
-    { id: 'attachments', label: 'Attachments', icon: Paperclip }
+    { id: 'attachments', label: 'Attachments', icon: Paperclip },
+    { id: 'timeline', label: 'Timeline', icon: Clock }
   ];
 
-  const [currentStage, setCurrentStage] = useState('Warm');
-
-  const handleStageChange = (stage: string) => {
-    setCurrentStage(stage);
-  };
-
-  const getCurrentStageIndex = () => {
-    return relationshipStages.findIndex(stage => stage.id === currentStage);
-  };
-
-  const getStageStatus = (stage: any, index: number) => {
-    const currentIndex = getCurrentStageIndex();
-    return {
-      completed: index < currentIndex,
-      active: index === currentIndex,
-      inactive: index > currentIndex
-    };
-  };
 
   // Task handler functions
   const handleTaskFormChange = (field: string, value: string) => {
@@ -409,66 +383,6 @@ const ContactDetails: React.FC<ContactDetailsProps> = ({ contact, onBack, onSave
       cursor: 'pointer',
       transition: 'background-color 0.2s'
     },
-    pipelineContainer: {
-      backgroundColor: 'white',
-      borderRadius: '8px',
-      border: '1px solid #e2e8f0',
-      margin: '4px 8px',
-      padding: '16px',
-      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-      flexShrink: 0
-    },
-    pipelineSteps: {
-      position: 'relative' as const
-    },
-    pipelineStepsContainer: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      position: 'relative' as const
-    },
-    stage: {
-      flex: 1,
-      display: 'flex',
-      flexDirection: 'column' as const,
-      alignItems: 'center',
-      cursor: 'pointer',
-      padding: '8px',
-      borderRadius: '8px',
-      transition: 'all 0.2s ease',
-      position: 'relative' as const
-    },
-    stageHover: {
-      backgroundColor: '#f3f4f6'
-    },
-    stageCircle: {
-      width: '32px',
-      height: '32px',
-      borderRadius: '50%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '14px',
-      fontWeight: '600',
-      color: 'white',
-      marginBottom: '8px',
-      transition: 'all 0.2s ease'
-    },
-    stageLabel: {
-      fontSize: '12px',
-      fontWeight: '500',
-      color: '#374151',
-      textAlign: 'center' as const
-    },
-    stageConnector: {
-      position: 'absolute' as const,
-      top: '24px',
-      left: '50%',
-      right: '-50%',
-      height: '2px',
-      backgroundColor: '#e5e7eb',
-      zIndex: 0
-    },
     tabsCard: {
       flex: 1,
       backgroundColor: 'white',
@@ -529,15 +443,6 @@ const ContactDetails: React.FC<ContactDetailsProps> = ({ contact, onBack, onSave
       border: '1px solid #e2e8f0',
       padding: '16px'
     },
-    cardTitle: {
-      fontSize: '16px',
-      fontWeight: '600',
-      color: '#374151',
-      marginBottom: '12px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px'
-    },
     fieldRow: {
       display: 'flex',
       justifyContent: 'space-between',
@@ -546,9 +451,11 @@ const ContactDetails: React.FC<ContactDetailsProps> = ({ contact, onBack, onSave
       borderBottom: '1px solid #e5e7eb'
     },
     fieldLabel: {
-      fontSize: '14px',
-      color: '#6b7280',
-      fontWeight: '500'
+      display: 'block',
+      fontSize: '11px',
+      fontWeight: '500',
+      color: '#374151',
+      marginBottom: '4px'
     },
     fieldValue: {
       fontSize: '14px',
@@ -813,12 +720,20 @@ const ContactDetails: React.FC<ContactDetailsProps> = ({ contact, onBack, onSave
       lineHeight: '1.5'
     },
     cardHeader: {
-      padding: '16px 20px',
-      borderBottom: '1px solid #f1f5f9',
-      backgroundColor: '#f8fafc'
+      padding: '8px 10px',
+      borderBottom: '1px solid #e2e8f0',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between'
+    },
+    cardTitle: {
+      fontSize: '13px',
+      fontWeight: '600',
+      color: '#1e293b',
+      margin: 0
     },
     cardContent: {
-      padding: '20px'
+      padding: '8px 10px'
     },
 
 
@@ -1107,106 +1022,38 @@ const ContactDetails: React.FC<ContactDetailsProps> = ({ contact, onBack, onSave
     fieldValueClickable: {
       cursor: 'pointer',
       transition: 'background-color 0.2s'
+    },
+    fieldGroup: {
+      marginBottom: '8px'
+    },
+    fieldGroupLast: {
+      marginBottom: '0'
+    },
+    fieldValueDisplay: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '6px 8px',
+      backgroundColor: '#f8fafc',
+      border: '1px solid #e2e8f0',
+      borderRadius: '4px',
+      fontSize: '13px',
+      color: '#1e293b'
+    },
+    fieldValueDisplayDescription: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      padding: '12px 8px',
+      backgroundColor: '#f8fafc',
+      border: '1px solid #e2e8f0',
+      borderRadius: '4px',
+      fontSize: '13px',
+      color: '#1e293b',
+      minHeight: '80px'
     }
   };
 
-  /**
-   * Renders a horizontal pipeline/relationship stage view for contacts
-   * This component displays the relationship stages in a linear progression
-   * with interactive hover effects and click handlers for stage changes
-   * 
-   * Features:
-   * - Visual pipeline with numbered stages
-   * - Hover effects with color changes
-   * - Click to change current stage
-   * - Connector lines between stages
-   * - Dynamic color based on completion status
-   * 
-   * @returns {JSX.Element} The pipeline view component
-   */
-  const renderPipelineView = () => {
-    // Get the current stage index for determining completion status
-    const currentIndex = getCurrentStageIndex();
-    
-    return (
-      <div style={styles.pipelineContainer}>
-        <div style={styles.pipelineSteps}>
-          <div style={styles.pipelineStepsContainer}>
-            {/* Map through all relationship stages to create the pipeline */}
-            {relationshipStages.map((stage, index) => {
-              // Get the status of this stage (completed, active, or inactive)
-              const status = getStageStatus(stage, index);
-              // Check if this stage is currently being hovered
-              const isHovered = hoveredStageIndex === index;
-              
-              /**
-               * Determines the base color for the stage circle
-               * @returns {string} Hex color code
-               */
-              const getStageColor = () => {
-                // Dark blue for completed or active stages
-                if (status.completed || status.active) return '#14235f';
-                // Light blue for inactive stages
-                return '#93c5fd';
-              };
-              
-              /**
-               * Determines the hover color for the stage circle
-               * @returns {string} Hex color code
-               */
-              const getHoverColor = () => {
-                // Darker blue for completed or active stages on hover
-                if (status.completed || status.active) return '#1e3a8a';
-                // Lighter blue for inactive stages on hover
-                return '#7dd3fc';
-              };
-              
-              return (
-                <div
-                  key={stage.id}
-                  style={{
-                    ...styles.stage,
-                    // Apply hover styles if this stage is being hovered
-                    ...(isHovered ? styles.stageHover : {})
-                  }}
-                  // Click handler to change the current stage
-                  onClick={() => handleStageChange(stage.id)}
-                  // Mouse enter handler to show hover effects
-                  onMouseEnter={() => setHoveredStageIndex(index)}
-                  // Mouse leave handler to hide hover effects
-                  onMouseLeave={() => setHoveredStageIndex(null)}
-                >
-                  {/* Render connector line between stages (except for the last stage) */}
-                  {index < relationshipStages.length - 1 && (
-                    <div style={{
-                      ...styles.stageConnector,
-                      // Dark blue for completed stages, light gray for incomplete
-                      backgroundColor: index < currentIndex ? '#14235f' : '#e5e7eb'
-                    }} />
-                  )}
-                  
-                  {/* Stage circle with number */}
-                  <div style={{
-                    ...styles.stageCircle,
-                    // Dynamic background color based on hover and completion status
-                    backgroundColor: isHovered ? getHoverColor() : getStageColor(),
-                    zIndex: 1 // Ensure circle appears above connector
-                  }}>
-                    {stage.number}
-                  </div>
-                  
-                  {/* Stage label */}
-                  <div style={styles.stageLabel}>
-                    {stage.label}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   const renderOverviewTab = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -1706,7 +1553,7 @@ const ContactDetails: React.FC<ContactDetailsProps> = ({ contact, onBack, onSave
         <div style={styles.card}>
           <div style={styles.cardTitle}>
             <HeartHandshake size={20} />
-            Associated Opportunities ({opportunities.length})
+            Opportunities ({opportunities.length})
           </div>
           
           {opportunities.length > 0 ? (
@@ -1890,6 +1737,18 @@ const ContactDetails: React.FC<ContactDetailsProps> = ({ contact, onBack, onSave
             </div>
           </div>
         );
+      case 'timeline':
+        return (
+          <div style={styles.placeholder}>
+            <div style={styles.placeholderTitle}>
+              Timeline Tab
+            </div>
+            <div style={styles.placeholderText}>
+              This section is ready for implementation.<br />
+              Contact timeline features will be added here.
+            </div>
+          </div>
+        );
       default:
         return (
           <div style={styles.placeholder}>
@@ -2053,8 +1912,6 @@ const ContactDetails: React.FC<ContactDetailsProps> = ({ contact, onBack, onSave
         </div>
       </div>
 
-      {/* Relationship Pipeline Card */}
-      {renderPipelineView()}
 
       {/* Tabs Card */}
       <div style={styles.tabsCard}>
