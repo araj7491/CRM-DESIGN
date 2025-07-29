@@ -463,18 +463,20 @@ const AccountDetails: React.FC<AccountDetailsProps> = ({ account, onBack, onSave
       fontWeight: '900'
     },
     accountTitle: {
-      fontSize: '36px',
-      fontWeight: '900',
-      color: '#1e293b',
+      fontSize: '28px',
+      fontWeight: '600',
+      color: '#1f2937',
       margin: 0,
-      lineHeight: '1.0'
+      lineHeight: '1.2',
+      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     },
     titleInfo: {
       fontSize: '14px',
-      color: '#64748b',
+      color: '#6b7280',
       margin: 0,
       marginTop: '4px',
-      textAlign: 'left' as const
+      textAlign: 'left' as const,
+      fontWeight: '400'
     },
     accountRight: {
       display: 'flex',
@@ -788,7 +790,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = ({ account, onBack, onSave
             </div>
             <div style={styles.nameAndDetails}>
               <h1 style={styles.accountTitle}>{account.name}</h1>
-              <p style={styles.titleInfo}>Owner: {account.owner}</p>
+              <p style={styles.titleInfo}>CEO</p>
             </div>
           </div>
           <div style={styles.accountRight}>

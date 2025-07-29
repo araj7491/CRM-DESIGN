@@ -55,6 +55,8 @@ import LeadsTable from './modules/Leads/LeadsTable';
 import LeadDetails from './modules/Leads/LeadDetails';
 import AccountsTable from './modules/Accounts/AccountsTable';
 import AccountDetails from './modules/Accounts/AccountDetails';
+import OpportunitiesTable from './modules/Opportunities/OpportunitiesTable';
+import OpportunityDetails from './modules/Opportunities/OpportunityDetails';
 import ContactsTable from './modules/Contacts/ContactsTable';
 import ContactDetails from './modules/Contacts/ContactDetails';
 
@@ -87,6 +89,10 @@ const App: React.FC = () => {
   const [showAccountDetails, setShowAccountDetails] = useState(false);
   const [selectedAccounts, setSelectedAccounts] = useState<number[]>([]);
   const [showAccountActionMenu, setShowAccountActionMenu] = useState<number | null>(null);
+  const [selectedOpportunity, setSelectedOpportunity] = useState<any>(null);
+  const [showOpportunityDetails, setShowOpportunityDetails] = useState(false);
+  const [selectedOpportunities, setSelectedOpportunities] = useState<number[]>([]);
+  const [showOpportunityActionMenu, setShowOpportunityActionMenu] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('');
   const [sortDirection, setSortDirection] = useState('asc');
@@ -257,6 +263,19 @@ const App: React.FC = () => {
     { id: 9, name: 'Blackstone', industry: 'Real Estate', owner: 'Mike Wilson', phone: '+1-555-0131', website: 'https://blackstone.com', created: '2024-01-07' },
     { id: 10, name: 'Red Solutions', industry: 'Technology', owner: 'David Brown', phone: '+1-555-0132', website: 'https://redsolutions.com', created: '2024-01-06' }
   ]);
+  // Sample opportunities data
+  const [opportunities, setOpportunities] = useState([
+    { id: 1, name: 'Tech Corp Enterprise Deal', stage: 'Prospecting', amount: 50000, closeDate: '2024-03-15', owner: 'Sarah Johnson', primaryContact: 'John Smith', created: '2024-01-15' },
+    { id: 2, name: 'Innovation Labs Partnership', stage: 'Qualification', amount: 75000, closeDate: '2024-02-28', owner: 'Mike Wilson', primaryContact: 'Sarah Johnson', created: '2024-01-14' },
+    { id: 3, name: 'StartupXYZ Software License', stage: 'Needs Analysis', amount: 35000, closeDate: '2024-04-10', owner: 'David Brown', primaryContact: 'Mike Davis', created: '2024-01-13' },
+    { id: 4, name: 'Global Solutions Consulting', stage: 'Proposal', amount: 120000, closeDate: '2024-03-01', owner: 'Sarah Johnson', primaryContact: 'Emma Wilson', created: '2024-01-12' },
+    { id: 5, name: 'Digital Agency Marketing Suite', stage: 'Negotiation', amount: 85000, closeDate: '2024-02-15', owner: 'Mike Wilson', primaryContact: 'James Brown', created: '2024-01-11' },
+    { id: 6, name: 'Eco Ventures Green Tech', stage: 'Prospecting', amount: 45000, closeDate: '2024-05-20', owner: 'David Brown', primaryContact: 'Linda Green', created: '2024-01-10' },
+    { id: 7, name: 'FinTech Payment System', stage: 'Qualification', amount: 95000, closeDate: '2024-03-30', owner: 'Sarah Johnson', primaryContact: 'Robert White', created: '2024-01-09' },
+    { id: 8, name: 'Blue Ocean Data Analytics', stage: 'Needs Analysis', amount: 65000, closeDate: '2024-04-15', owner: 'Mike Wilson', primaryContact: 'Jessica Blue', created: '2024-01-08' },
+    { id: 9, name: 'Blackstone Investment Platform', stage: 'Proposal', amount: 150000, closeDate: '2024-02-20', owner: 'David Brown', primaryContact: 'David Black', created: '2024-01-07' },
+    { id: 10, name: 'Red Solutions Cloud Migration', stage: 'Negotiation', amount: 110000, closeDate: '2024-03-10', owner: 'Sarah Johnson', primaryContact: 'Sophia Red', created: '2024-01-06' }
+  ]);
 
   const [newLead, setNewLead] = useState({
     name: '',
@@ -355,6 +374,46 @@ const App: React.FC = () => {
                            lead.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            lead.email.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesFilter = filterStatus === 'all' || lead.status === filterStatus;
+      return matchesSearch && matchesFilter;
+    })
+    .sort((a, b) => {
+      if (!sortField) return 0;
+      const aValue = a[sortField as keyof typeof a];
+      const bValue = b[sortField as keyof typeof b];
+      if (sortDirection === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
+
+  // Filter and sort accounts
+  const filteredAccounts = accounts
+    .filter(account => {
+      const matchesSearch = account.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           account.industry.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           account.owner.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesFilter = filterStatus === 'all' || account.industry === filterStatus;
+      return matchesSearch && matchesFilter;
+    })
+    .sort((a, b) => {
+      if (!sortField) return 0;
+      const aValue = a[sortField as keyof typeof a];
+      const bValue = b[sortField as keyof typeof b];
+      if (sortDirection === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
+  // Filter and sort opportunities
+  const filteredOpportunities = opportunities
+    .filter(opportunity => {
+      const matchesSearch = opportunity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           opportunity.stage.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           opportunity.owner.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           opportunity.primaryContact.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesFilter = filterStatus === 'all' || opportunity.stage === filterStatus;
       return matchesSearch && matchesFilter;
     })
     .sort((a, b) => {
@@ -506,6 +565,38 @@ const App: React.FC = () => {
   const handleBackToAccounts = () => {
     setShowAccountDetails(false);
     setSelectedAccount(null);
+  };
+  const handleSelectOpportunity = (opportunityId: number) => {
+    setSelectedOpportunities(prev => 
+      prev.includes(opportunityId) 
+        ? prev.filter(id => id !== opportunityId)
+        : [...prev, opportunityId]
+    );
+  };
+  const handleSelectAllOpportunities = () => {
+    if (selectedOpportunities.length === filteredOpportunities.length) {
+      setSelectedOpportunities([]);
+    } else {
+      setSelectedOpportunities(filteredOpportunities.map(opportunity => opportunity.id));
+    }
+  };
+  const handleOpportunityClick = (opportunity: any) => {
+    setSelectedOpportunity(opportunity);
+    setShowOpportunityDetails(true);
+  };
+  const handleBackToOpportunities = () => {
+    setShowOpportunityDetails(false);
+    setSelectedOpportunity(null);
+  };
+  const handleOpportunityActionClick = (action: string, opportunity: any) => {
+    if (action === 'view') {
+      handleOpportunityClick(opportunity);
+    } else if (action === 'edit') {
+      console.log('Edit opportunity:', opportunity);
+    } else if (action === 'delete') {
+      setOpportunities(opportunities.filter(o => o.id !== opportunity.id));
+    }
+    setShowOpportunityActionMenu(null);
   };
 
   const handleAccountActionClick = (action: string, account: any) => {
@@ -1207,6 +1298,18 @@ const App: React.FC = () => {
       case 'Contacted': return { ...styles.status, ...styles.statusContacted };
       case 'Proposal': return { ...styles.status, ...styles.statusProposal };
       case 'Negotiation': return { ...styles.status, ...styles.statusNegotiation };
+      default: return styles.status;
+    }
+  };
+  const getStageStyle = (stage: string) => {
+    switch (stage) {
+      case 'Prospecting': return { ...styles.status, ...styles.statusNew };
+      case 'Qualification': return { ...styles.status, ...styles.statusQualified };
+      case 'Needs Analysis': return { ...styles.status, ...styles.statusContacted };
+      case 'Proposal': return { ...styles.status, ...styles.statusProposal };
+      case 'Negotiation': return { ...styles.status, ...styles.statusNegotiation };
+      case 'Closed Won': return { ...styles.status, backgroundColor: '#10b981', color: 'white' };
+      case 'Closed Lost': return { ...styles.status, backgroundColor: '#ef4444', color: 'white' };
       default: return styles.status;
     }
   };
@@ -2650,7 +2753,7 @@ const App: React.FC = () => {
 
               {/* Table Controls */}
               <div style={styles.tableControls}>
-                <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '8px', flex: 1}}>
                   <Search size={16} color="#6b7280" />
                   <input
                     type="text"
@@ -2693,6 +2796,7 @@ const App: React.FC = () => {
                       padding: '8px 12px',
                       borderRadius: '6px',
                       fontSize: '13px',
+                      minWidth: '80px',
                     }}
                     onClick={() => setShowSortMenu(!showSortMenu)}
                   >
@@ -2929,7 +3033,7 @@ const App: React.FC = () => {
                 </div>
               </div>
               <AccountsTable
-                accounts={accounts}
+                accounts={filteredAccounts}
                 selectedAccounts={selectedAccounts}
                 showActionMenu={showAccountActionMenu}
                 onSelectAccount={handleSelectAccount}
