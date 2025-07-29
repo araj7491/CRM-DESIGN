@@ -9,6 +9,7 @@ import {
   Plus,
   Calendar,
   ArrowUpDown,
+  ArrowLeft,
   X,
   Upload,
   Edit2,
@@ -191,17 +192,6 @@ const OpportunityDetails: React.FC<OpportunityDetailsProps> = ({ opportunity, on
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   
-  // Pipeline hover state
-  const [hoveredStageIndex, setHoveredStageIndex] = useState<number | null>(null);
-  
-  const pipelineStages = [
-    { id: 'Prospecting', label: 'Prospecting', number: 1 },
-    { id: 'Qualification', label: 'Qualification', number: 2 },
-    { id: 'Needs Analysis', label: 'Needs Analysis', number: 3 },
-    { id: 'Proposal', label: 'Proposal', number: 4 },
-    { id: 'Negotiation', label: 'Negotiation', number: 5 },
-    { id: 'Closed Won/Lost', label: 'Closed Won/Lost', number: 6 }
-  ];
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
@@ -215,22 +205,6 @@ const OpportunityDetails: React.FC<OpportunityDetailsProps> = ({ opportunity, on
     { id: 'timeline', label: 'Timeline', icon: Clock }
   ];
 
-  const handleStageChange = (stage: string) => {
-    setCurrentStage(stage);
-  };
-
-  const getCurrentStageIndex = () => {
-    return pipelineStages.findIndex(stage => stage.id === currentStage);
-  };
-
-  const getStageStatus = (stage: any, index: number) => {
-    const currentIndex = getCurrentStageIndex();
-    return {
-      completed: index < currentIndex,
-      active: index === currentIndex,
-      inactive: index > currentIndex
-    };
-  };
 
   // Task handler functions
   const handleTaskFormChange = (field: string, value: string) => {
@@ -696,136 +670,6 @@ const OpportunityDetails: React.FC<OpportunityDetailsProps> = ({ opportunity, on
     );
   };
 
-  const renderPipelineView = () => {
-    const isLastStage = currentStage === 'Closed Won/Lost';
-    
-    return (
-      <div style={styles.pipelineContainer}>
-        <div style={styles.pipelineSteps}>
-          <div style={styles.pipelineStepsContainer}>
-            {pipelineStages.map((stage, index) => {
-              const status = getStageStatus(stage, index);
-              const isHovered = hoveredStageIndex === index;
-              
-              // Generate SVG chevron path
-              const createChevronPath = (index: number, totalStages: number) => {
-                const isFirst = index === 0;
-                const isLast = index === totalStages - 1;
-                const width = 120;
-                const height = 36;
-                const chevronSize = 6;
-                
-                let path = '';
-                
-                if (isFirst) {
-                  // First chevron: straight left edge, pointed right
-                  path = `M 0,0 L ${width - chevronSize},0 L ${width},${height/2} L ${width - chevronSize},${height} L 0,${height} Z`;
-                } else if (isLast) {
-                  // Last chevron: pointed left, straight right edge
-                  path = `M ${chevronSize},0 L ${width},0 L ${width},${height} L ${chevronSize},${height} L 0,${height/2} Z`;
-                } else {
-                  // Middle chevrons: pointed on both sides
-                  path = `M ${chevronSize},0 L ${width - chevronSize},0 L ${width},${height/2} L ${width - chevronSize},${height} L ${chevronSize},${height} L 0,${height/2} Z`;
-                }
-                
-                return path;
-              };
-
-              let backgroundColor = '#e2e8f0'; // inactive
-              let textColor = '#64748b';
-              
-              if (status.completed) {
-                backgroundColor = '#10b981'; // green for completed
-                textColor = 'white';
-              } else if (status.active) {
-                backgroundColor = '#3b82f6'; // blue for active
-                textColor = 'white';
-              }
-              
-              if (isHovered) {
-                backgroundColor = status.completed ? '#059669' : 
-                                 status.active ? '#2563eb' : '#cbd5e1';
-              }
-
-              return (
-                <div
-                  key={stage.id}
-                  style={{
-                    ...styles.stage,
-                    ...(isHovered ? styles.stageHover : {})
-                  }}
-                  onMouseEnter={() => setHoveredStageIndex(index)}
-                  onMouseLeave={() => setHoveredStageIndex(null)}
-                  onClick={() => handleStageChange(stage.id)}
-                >
-                  <div style={styles.stageChevron}>
-                    <svg 
-                      width="120" 
-                      height="36" 
-                      viewBox="0 0 120 36"
-                      style={{ 
-                        position: 'absolute', 
-                        top: 0, 
-                        left: 0,
-                        filter: isHovered ? 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15))' : 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))'
-                      }}
-                    >
-                      <path
-                        d={createChevronPath(index, pipelineStages.length)}
-                        fill={backgroundColor}
-                        stroke="#ffffff"
-                        strokeWidth="0.5"
-                      />
-                    </svg>
-                    <div style={{...styles.stageContent, color: textColor}}>
-                      <span style={styles.stageLabel}>{stage.label}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          
-          {isLastStage && (
-            <div style={styles.closeOpportunityOptions}>
-              <button
-                style={styles.closeOpportunityWonButton}
-                onMouseEnter={(e) => {
-                  (e.target as HTMLElement).style.backgroundColor = '#15803d';
-                }}
-                onMouseLeave={(e) => {
-                  (e.target as HTMLElement).style.backgroundColor = '#16a34a';
-                }}
-                onClick={() => {
-                  setCurrentStage('Closed Won');
-                  // Handle won logic
-                }}
-              >
-                <CheckCircle size={16} />
-                Close Won
-              </button>
-              <button
-                style={styles.closeOpportunityLostButton}
-                onMouseEnter={(e) => {
-                  (e.target as HTMLElement).style.backgroundColor = '#b91c1c';
-                }}
-                onMouseLeave={(e) => {
-                  (e.target as HTMLElement).style.backgroundColor = '#dc2626';
-                }}
-                onClick={() => {
-                  setCurrentStage('Closed Lost');
-                  // Handle lost logic
-                }}
-              >
-                <X size={16} />
-                Close Lost
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -1715,8 +1559,23 @@ const OpportunityDetails: React.FC<OpportunityDetailsProps> = ({ opportunity, on
     opportunityLeft: {
       display: 'flex',
       flexDirection: 'row' as const,
-      gap: '2px',
+      gap: '12px',
       alignItems: 'flex-start'
+    },
+    universalBackButton: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '36px',
+      height: '36px',
+      backgroundColor: '#f1f5f9',
+      color: '#64748b',
+      border: '1px solid #e2e8f0',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+      fontSize: '14px',
+      marginTop: '4px'
     },
     logoSection: {
       display: 'flex',
@@ -1984,119 +1843,6 @@ const OpportunityDetails: React.FC<OpportunityDetailsProps> = ({ opportunity, on
     fieldValueClickable: {
       cursor: 'pointer',
       transition: 'background-color 0.2s'
-    },
-    // Pipeline styles - Sleek pencil-like design
-    pipelineContainer: {
-      backgroundColor: 'white',
-      borderRadius: '12px',
-      border: '1px solid #e2e8f0',
-      margin: '0 8px 8px 8px',
-      padding: '16px 20px',
-      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.06)',
-      flexShrink: 0
-    },
-    pipelineSteps: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '0',
-      overflow: 'hidden'
-    },
-    pipelineStepsContainer: {
-      display: 'flex',
-      alignItems: 'center',
-      flex: 1,
-      gap: '0',
-      justifyContent: 'center'
-    },
-    stage: {
-      position: 'relative' as const,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      fontSize: '12px',
-      fontWeight: '600',
-      transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-      marginRight: '-2px',
-      zIndex: 1
-    },
-    stageHover: {
-      transform: 'scale(1.02)',
-      zIndex: 10,
-      filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15))'
-    },
-
-    stageChevron: {
-      position: 'relative' as const,
-      width: '120px',
-      height: '36px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-      filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))'
-    },
-    stageContent: {
-      position: 'relative' as const,
-      zIndex: 2,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: '100%',
-      height: '100%',
-      color: 'white',
-      padding: '6px 12px',
-      textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
-    },
-    stageLabel: {
-      fontSize: '12px',
-      fontWeight: '600',
-      whiteSpace: 'nowrap' as const,
-      overflow: 'hidden',
-      textOverflow: 'ellipsis'
-    },
-
-
-    closeOpportunityButtons: {
-      display: 'flex',
-      gap: '8px',
-      marginLeft: '16px'
-    },
-    closeOpportunityOptions: {
-      display: 'flex',
-      gap: '8px',
-      marginLeft: '16px'
-    },
-    closeOpportunityWonButton: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '6px',
-      padding: '8px 16px',
-      backgroundColor: '#16a34a',
-      color: 'white',
-      fontSize: '13px',
-      borderRadius: '6px',
-      border: 'none',
-      cursor: 'pointer',
-      fontWeight: '500',
-      transition: 'background-color 0.2s',
-      whiteSpace: 'nowrap' as const
-    },
-    closeOpportunityLostButton: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '6px',
-      padding: '8px 16px',
-      backgroundColor: '#dc2626',
-      color: 'white',
-      fontSize: '13px',
-      borderRadius: '6px',
-      border: 'none',
-      cursor: 'pointer',
-      fontWeight: '500',
-      transition: 'background-color 0.2s',
-      whiteSpace: 'nowrap' as const
     },
     // Attachments styles
     addAttachmentButton: {
@@ -2785,10 +2531,19 @@ const OpportunityDetails: React.FC<OpportunityDetailsProps> = ({ opportunity, on
 
   return (
     <div style={styles.container}>
+
       {/* Opportunity Information Card */}
       <div style={styles.opportunityCard}>
         <div style={styles.opportunityHeader}>
           <div style={styles.opportunityLeft}>
+            {/* Universal Back Button */}
+            <button
+              style={styles.universalBackButton}
+              onClick={onBack}
+              title="Back"
+            >
+              <ArrowLeft size={18} />
+            </button>
             <div style={styles.logoSection}>
               <div style={styles.companyLogo}>
                 {opportunity.name.charAt(0).toUpperCase()}
@@ -2816,8 +2571,6 @@ const OpportunityDetails: React.FC<OpportunityDetailsProps> = ({ opportunity, on
         </div>
       </div>
 
-      {/* Pipeline Card */}
-      {renderPipelineView()}
 
       {/* Tabs Card */}
       <div style={styles.tabsCard}>

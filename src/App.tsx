@@ -212,6 +212,39 @@ const App: React.FC = () => {
         setSortField('created');
         setSortDirection('desc');
         break;
+      // Opportunity-specific sort options
+      case 'stage-asc':
+        setSortField('stage');
+        setSortDirection('asc');
+        break;
+      case 'stage-desc':
+        setSortField('stage');
+        setSortDirection('desc');
+        break;
+      case 'amount-asc':
+        setSortField('amount');
+        setSortDirection('asc');
+        break;
+      case 'amount-desc':
+        setSortField('amount');
+        setSortDirection('desc');
+        break;
+      case 'closeDate-asc':
+        setSortField('closeDate');
+        setSortDirection('asc');
+        break;
+      case 'closeDate-desc':
+        setSortField('closeDate');
+        setSortDirection('desc');
+        break;
+      case 'created-asc':
+        setSortField('created');
+        setSortDirection('asc');
+        break;
+      case 'created-desc':
+        setSortField('created');
+        setSortDirection('desc');
+        break;
       default:
         break;
     }
@@ -1458,6 +1491,65 @@ const App: React.FC = () => {
           </h1>
         </div>
         <div style={styles.headerActions}>
+          {/* App Icons */}
+          <div style={{display: 'flex', alignItems: 'center', gap: '6px', marginRight: '16px'}}>
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                borderRadius: '6px',
+                padding: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                border: 'none',
+                color: 'white',
+                boxShadow: '0 2px 6px rgba(59, 130, 246, 0.3)',
+                minWidth: '32px',
+                minHeight: '32px',
+              }}
+              title="Team Inbox"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 3px 10px rgba(59, 130, 246, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 6px rgba(59, 130, 246, 0.3)';
+              }}
+            >
+              <MessageCircle size={14} />
+            </button>
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
+                borderRadius: '6px',
+                padding: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                border: 'none',
+                color: 'white',
+                boxShadow: '0 2px 6px rgba(96, 165, 250, 0.3)',
+                minWidth: '32px',
+                minHeight: '32px',
+              }}
+              title="Sales"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 3px 10px rgba(96, 165, 250, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 6px rgba(96, 165, 250, 0.3)';
+              }}
+            >
+              <TrendingUp size={14} />
+            </button>
+          </div>
           <div style={styles.dropdownContainer}>
             <button
               style={styles.button}
@@ -3076,34 +3168,388 @@ const App: React.FC = () => {
                   New Opportunity
                 </button>
               </div>
-              <div style={styles.toolbar}>
-                <div style={styles.toolbarLeft}>
-                  <div style={styles.searchBox}>
-                    <Search size={16} style={styles.searchIcon} />
-                    <input
-                      type="text"
-                      placeholder="Search opportunities..."
-                      style={styles.searchInput}
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
-                  <div style={styles.filterGroup}>
-                    <select
-                      style={styles.select}
-                      value={filterStatus}
-                      onChange={(e) => setFilterStatus(e.target.value)}
-                    >
-                      <option value="all">All Stages</option>
-                      <option value="Prospecting">Prospecting</option>
-                      <option value="Qualification">Qualification</option>
-                      <option value="Needs Analysis">Needs Analysis</option>
-                      <option value="Proposal">Proposal</option>
-                      <option value="Negotiation">Negotiation</option>
-                      <option value="Closed Won">Closed Won</option>
-                      <option value="Closed Lost">Closed Lost</option>
-                    </select>
-                  </div>
+              {/* Table Controls */}
+              <div style={styles.tableControls}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                  <Search size={16} color="#6b7280" />
+                  <input
+                    type="text"
+                    placeholder="Search opportunities..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={styles.searchInput}
+                  />
+                </div>
+                <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                  <Filter size={16} color="#6b7280" />
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    style={styles.select}
+                  >
+                    <option value="all">All Stages</option>
+                    <option value="Prospecting">Prospecting</option>
+                    <option value="Qualification">Qualification</option>
+                    <option value="Needs Analysis">Needs Analysis</option>
+                    <option value="Proposal">Proposal</option>
+                    <option value="Negotiation">Negotiation</option>
+                    <option value="Closed Won">Closed Won</option>
+                    <option value="Closed Lost">Closed Lost</option>
+                  </select>
+                </div>
+                <div style={{display: 'flex', alignItems: 'center', gap: '8px', position: 'relative'}}>
+                  <ArrowUpDown size={16} color="#6b7280" />
+                  <button
+                    style={{
+                      ...styles.select,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      backgroundColor: 'white',
+                      border: '1px solid #d1d5db',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                    }}
+                    onClick={() => setShowSortMenu(!showSortMenu)}
+                  >
+                    Sort
+                    <ChevronDown size={14} />
+                  </button>
+                  {showSortMenu && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      backgroundColor: 'white',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                      border: '1px solid #e5e7eb',
+                      minWidth: '200px',
+                      zIndex: 1000,
+                      marginTop: '4px',
+                    }}>
+                      <div style={{padding: '8px 16px', fontSize: '12px', color: '#6b7280', borderBottom: '1px solid #e5e7eb'}}>
+                        Sort by Name
+                      </div>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('name-asc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        A to Z
+                      </button>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('name-desc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        Z to A
+                      </button>
+                      <div style={{padding: '8px 16px', fontSize: '12px', color: '#6b7280', borderBottom: '1px solid #e5e7eb'}}>
+                        Sort by Stage
+                      </div>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('stage-asc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        A to Z
+                      </button>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('stage-desc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        Z to A
+                      </button>
+                      <div style={{padding: '8px 16px', fontSize: '12px', color: '#6b7280', borderBottom: '1px solid #e5e7eb'}}>
+                        Sort by Amount
+                      </div>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('amount-asc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        Low to High
+                      </button>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('amount-desc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        High to Low
+                      </button>
+                      <div style={{padding: '8px 16px', fontSize: '12px', color: '#6b7280', borderBottom: '1px solid #e5e7eb'}}>
+                        Sort by Close Date
+                      </div>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('closeDate-asc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        Oldest First
+                      </button>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('closeDate-desc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        Newest First
+                      </button>
+                      <div style={{padding: '8px 16px', fontSize: '12px', color: '#6b7280', borderBottom: '1px solid #e5e7eb'}}>
+                        Sort by Owner
+                      </div>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('owner-asc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        A to Z
+                      </button>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('owner-desc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        Z to A
+                      </button>
+                      <div style={{padding: '8px 16px', fontSize: '12px', color: '#6b7280', borderBottom: '1px solid #e5e7eb'}}>
+                        Sort by Created Date
+                      </div>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('created-asc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        Oldest First
+                      </button>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('created-desc')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        Newest First
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
               <OpportunitiesTable

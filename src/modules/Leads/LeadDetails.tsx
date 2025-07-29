@@ -191,16 +191,6 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   
-  // Pipeline hover state
-  const [hoveredStageIndex, setHoveredStageIndex] = useState<number | null>(null);
-  
-  const pipelineStages = [
-    { id: 'New', label: 'New', number: 1 },
-    { id: 'Contacted', label: 'Contacted', number: 2 },
-    { id: 'Qualified', label: 'Qualified', number: 3 },
-    { id: 'Proposed', label: 'Proposed', number: 4 },
-    { id: 'Closed', label: 'Closed', number: 5 }
-  ];
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
@@ -212,22 +202,6 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
     { id: 'timeline', label: 'Timeline', icon: Clock }
   ];
 
-  const handleStageChange = (stage: string) => {
-    setCurrentStage(stage);
-  };
-
-  const getCurrentStageIndex = () => {
-    return pipelineStages.findIndex(stage => stage.id === currentStage);
-  };
-
-  const getStageStatus = (stage: any, index: number) => {
-    const currentIndex = getCurrentStageIndex();
-    return {
-      completed: index < currentIndex,
-      active: index === currentIndex,
-      inactive: index > currentIndex
-    };
-  };
 
   // Task handler functions
   const handleTaskFormChange = (field: string, value: string) => {
@@ -746,6 +720,26 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
       fontWeight: '500',
       transition: 'background-color 0.2s'
     },
+    quickActions: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      marginRight: '12px'
+    },
+    quickActionButton: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '36px',
+      height: '36px',
+      backgroundColor: '#f1f5f9',
+      color: '#64748b',
+      border: '1px solid #e2e8f0',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+      fontSize: '14px'
+    },
     content: {
       flex: 1,
       display: 'flex',
@@ -946,119 +940,6 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
     fieldValueClickable: {
       cursor: 'pointer',
       transition: 'background-color 0.2s'
-    },
-    // Pipeline styles - Sleek pencil-like design
-    pipelineContainer: {
-      backgroundColor: 'white',
-      borderRadius: '12px',
-      border: '1px solid #e2e8f0',
-      margin: '0 8px 8px 8px',
-      padding: '16px 20px',
-      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.06)',
-      flexShrink: 0
-    },
-    pipelineSteps: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '0',
-      overflow: 'hidden'
-    },
-    pipelineStepsContainer: {
-      display: 'flex',
-      alignItems: 'center',
-      flex: 1,
-      gap: '0',
-      justifyContent: 'center'
-    },
-    stage: {
-      position: 'relative' as const,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      fontSize: '12px',
-      fontWeight: '600',
-      transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-      marginRight: '-2px',
-      zIndex: 1
-    },
-    stageHover: {
-      transform: 'scale(1.02)',
-      zIndex: 10,
-      filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15))'
-    },
-
-    stageChevron: {
-      position: 'relative' as const,
-      width: '120px',
-      height: '36px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-      filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))'
-    },
-    stageContent: {
-      position: 'relative' as const,
-      zIndex: 2,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: '100%',
-      height: '100%',
-      color: 'white',
-      padding: '6px 12px',
-      textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
-    },
-    stageLabel: {
-      fontSize: '12px',
-      fontWeight: '600',
-      whiteSpace: 'nowrap' as const,
-      overflow: 'hidden',
-      textOverflow: 'ellipsis'
-    },
-
-
-    closeOpportunityButtons: {
-      display: 'flex',
-      gap: '8px',
-      marginLeft: '16px'
-    },
-    closeOpportunityOptions: {
-      display: 'flex',
-      gap: '8px',
-      marginLeft: '16px'
-    },
-    closeOpportunityWonButton: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '6px',
-      padding: '8px 16px',
-      backgroundColor: '#16a34a',
-      color: 'white',
-      fontSize: '13px',
-      borderRadius: '6px',
-      border: 'none',
-      cursor: 'pointer',
-      fontWeight: '500',
-      transition: 'background-color 0.2s',
-      whiteSpace: 'nowrap' as const
-    },
-    closeOpportunityLostButton: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '6px',
-      padding: '8px 16px',
-      backgroundColor: '#dc2626',
-      color: 'white',
-      fontSize: '13px',
-      borderRadius: '6px',
-      border: 'none',
-      cursor: 'pointer',
-      fontWeight: '500',
-      transition: 'background-color 0.2s',
-      whiteSpace: 'nowrap' as const
     },
     // Attachments styles
     addAttachmentButton: {
@@ -2104,92 +1985,6 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
 
 
 
-  const renderPipelineView = () => {
-    const currentIndex = getCurrentStageIndex();
-
-    return (
-      <div style={styles.pipelineContainer}>
-        <div style={styles.pipelineSteps}>
-          <div style={styles.pipelineStepsContainer}>
-            {pipelineStages.map((stage, index) => {
-              const status = getStageStatus(stage, index);
-              const isHovered = hoveredStageIndex === index;
-              
-              // Determine background color based on status
-              const getStageColor = () => {
-                if (status.completed || status.active) return '#14235f'; // Dark blue for active/completed
-                return '#93c5fd'; // Light blue for default state
-              };
-
-              const getHoverColor = () => {
-                if (status.completed || status.active) return '#1e3a8a'; // Slightly lighter dark blue on hover
-                return '#7dd3fc'; // Slightly lighter blue on hover
-              };
-              
-              return (
-                <div
-                  key={stage.id}
-                  style={{
-                    ...styles.stage,
-                    ...(isHovered ? styles.stageHover : {})
-                  }}
-                  onClick={() => handleStageChange(stage.id)}
-                  onMouseEnter={() => setHoveredStageIndex(index)}
-                  onMouseLeave={() => setHoveredStageIndex(null)}
-                >
-                  {/* Sleek pencil-like arrow shape */}
-                  <div 
-                    style={{
-                      ...styles.stageChevron,
-                      backgroundColor: isHovered ? getHoverColor() : getStageColor(),
-                      clipPath: index === 0 
-                        ? 'polygon(0% 0%, calc(100% - 12px) 0%, 100% 50%, calc(100% - 12px) 100%, 0% 100%)'
-                        : index === pipelineStages.length - 1
-                        ? 'polygon(12px 0%, 100% 0%, 100% 100%, 12px 100%, 0% 50%)'
-                        : 'polygon(12px 0%, calc(100% - 12px) 0%, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0% 50%)',
-                      transform: isHovered ? 'translateY(-1px)' : 'translateY(0)',
-                      boxShadow: isHovered 
-                        ? '0 4px 12px rgba(0, 0, 0, 0.15)' 
-                        : '0 2px 4px rgba(0, 0, 0, 0.08)'
-                    }}
-                  >
-                    <div style={styles.stageContent}>
-                      <span style={styles.stageLabel}>{stage.label}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          
-          {currentStage === 'Closed' && (
-            <div style={styles.closeOpportunityButtons}>
-              <button
-                style={styles.closeOpportunityWonButton}
-                onClick={() => {
-                  console.log('Opportunity won');
-                  // Handle opportunity won logic here
-                }}
-              >
-                <CheckCircle size={12} />
-                Close Opportunity as Won
-              </button>
-              <button
-                style={styles.closeOpportunityLostButton}
-                onClick={() => {
-                  console.log('Opportunity lost');
-                  // Handle opportunity lost logic here
-                }}
-              >
-                <X size={12} />
-                Close Opportunity as Lost
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
 
   const renderOverviewTab = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -3460,6 +3255,38 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
             </div>
           </div>
           <div style={styles.leadRight}>
+            {/* Quick Action Icons */}
+            <div style={styles.quickActions}>
+              <button 
+                style={styles.quickActionButton}
+                onClick={() => {
+                  setShowCreateEmailModal(true);
+                }}
+                title="Send Email"
+              >
+                <Mail size={16} />
+              </button>
+              <button 
+                style={styles.quickActionButton}
+                onClick={() => {
+                  // Handle call action
+                  console.log('Call action clicked');
+                }}
+                title="Make Call"
+              >
+                <Phone size={16} />
+              </button>
+              <button 
+                style={styles.quickActionButton}
+                onClick={() => {
+                  // Handle meeting action
+                  console.log('Schedule Meeting');
+                }}
+                title="Schedule Meeting"
+              >
+                <Calendar size={16} />
+              </button>
+            </div>
             <button 
               style={styles.convertButton}
             >
@@ -3470,8 +3297,6 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
         </div>
       </div>
 
-      {/* Pipeline Card */}
-      {renderPipelineView()}
 
       {/* Tabs Card */}
       <div style={styles.tabsCard}>
