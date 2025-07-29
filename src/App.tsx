@@ -48,6 +48,8 @@ import {
   Mail as MailIcon,
   FileText as FileIcon,
   MoreVertical,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import LeadsTable from './modules/Leads/LeadsTable';
 import LeadDetails from './modules/Leads/LeadDetails';
@@ -2352,37 +2354,179 @@ const App: React.FC = () => {
 
           {/* Contacts Section */}
           {activeSection === 'contacts' && !showContactDetails && (
-            <div style={{...styles.contentHeader, marginBottom: '24px'}}>
-              <div style={styles.pageHeader}>
-                <h1 style={styles.pageTitle}>Contacts</h1>
-                <p style={styles.pageSubtitle}>Manage your contact relationships</p>
-              </div>
-
-              <div style={styles.pageActions}>
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
+                <h3 style={styles.cardTitle}>Contacts Management</h3>
                 <button
-                  style={styles.primaryButton}
+                  style={styles.button}
                   onClick={() => console.log('Create contact')}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#2563eb';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#3b82f6';
+                  }}
                 >
-                  <UserPlus size={20} />
-                  Create Contact
+                  <Plus size={16} />
+                  Create New Contact
                 </button>
               </div>
-            </div>
-          )}
 
-          {activeSection === 'contacts' && !showContactDetails && (
-            <ContactsTable
-              contacts={contacts}
-              selectedContacts={selectedContacts}
-              showActionMenu={showContactActionMenu}
-              onSelectContact={handleSelectContact}
-              onSelectAllContacts={handleSelectAllContacts}
-              onActionMenuClick={handleContactActionMenuClick}
-              onActionClick={handleContactActionClick}
-              onContactClick={handleContactClick}
-              onSort={handleContactSort}
-              styles={styles}
-            />
+              {/* Table Controls */}
+              <div style={styles.tableControls}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                  <Search size={16} color="#6b7280" />
+                  <input
+                    type="text"
+                    placeholder="Search contacts..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={styles.searchInput}
+                  />
+                </div>
+                <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                  <Filter size={16} color="#6b7280" />
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    style={styles.select}
+                  >
+                    <option value="all">All Status</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                    <option value="Prospect">Prospect</option>
+                  </select>
+                </div>
+                <div style={{display: 'flex', alignItems: 'center', gap: '8px', position: 'relative'}}>
+                  <ArrowUpDown size={16} color="#6b7280" />
+                  <button
+                    style={{
+                      ...styles.select,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      backgroundColor: 'white',
+                      border: '1px solid #d1d5db',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                    }}
+                    onClick={() => setShowSortMenu(!showSortMenu)}
+                  >
+                    Sort
+                    <ChevronDown size={14} />
+                  </button>
+                  {showSortMenu && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      backgroundColor: 'white',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                      border: '1px solid #e5e7eb',
+                      minWidth: '200px',
+                      zIndex: 1000,
+                      marginTop: '4px',
+                    }}>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('name')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        <ArrowUp size={16} />
+                        Name (A-Z)
+                      </button>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('name')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        <ArrowDown size={16} />
+                        Name (Z-A)
+                      </button>
+                      <button
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#374151',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: '100%',
+                          textAlign: 'left',
+                        }}
+                        onClick={() => handleSortOption('created')}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        <CalendarIcon size={16} />
+                        Date Created
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Contacts Table */}
+              <ContactsTable
+                contacts={contacts}
+                selectedContacts={selectedContacts}
+                showActionMenu={showContactActionMenu}
+                onSelectContact={handleSelectContact}
+                onSelectAllContacts={handleSelectAllContacts}
+                onActionMenuClick={handleContactActionMenuClick}
+                onActionClick={handleContactActionClick}
+                onContactClick={handleContactClick}
+                onSort={handleContactSort}
+                styles={styles}
+              />
+            </div>
           )}
 
           {/* Contact Details Page */}
