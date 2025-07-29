@@ -25,8 +25,7 @@ import {
   Phone,
   HeartHandshake,
   FileText,
-  ShoppingCart,
-  Package,
+
   Home,
   TrendingUp,
   Clock,
@@ -38,8 +37,6 @@ import {
   ChevronDown,
   UserPlus,
   Building2,
-  FileText as QuoteIcon,
-  ShoppingBag,
   Square,
   ArrowLeft,
   ChevronLeft,
@@ -52,8 +49,10 @@ import {
   FileText as FileIcon,
   MoreVertical,
 } from 'lucide-react';
-import LeadsTable from './components/LeadsTable';
-import LeadDetails from './components/LeadDetails';
+import LeadsTable from './modules/Leads/LeadsTable';
+import LeadDetails from './modules/Leads/LeadDetails';
+import ContactsTable from './modules/Contacts/ContactsTable';
+import ContactDetails from './modules/Contacts/ContactDetails';
 
 ChartJS.register(
   CategoryScale,
@@ -70,12 +69,16 @@ ChartJS.register(
 const App: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(false);
-  const [activeSection, setActiveSection] = useState('dashboard');
+  const [activeSection, setActiveSection] = useState<'dashboard' | 'leads' | 'accounts' | 'contacts' | 'deals'>('dashboard');
   const [showLeadModal, setShowLeadModal] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
   const [showCreateLeadPage, setShowCreateLeadPage] = useState(false);
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [showLeadDetails, setShowLeadDetails] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<any>(null);
+  const [showContactDetails, setShowContactDetails] = useState(false);
+  const [selectedContacts, setSelectedContacts] = useState<number[]>([]);
+  const [showContactActionMenu, setShowContactActionMenu] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('');
   const [sortDirection, setSortDirection] = useState('asc');
@@ -203,6 +206,20 @@ const App: React.FC = () => {
     { id: 15, name: 'Frank Silver', company: 'Silverline', email: 'frank@silverline.com', phone: '+1-555-0137', status: 'Negotiation', value: 19500, source: 'Website', created: '2024-01-01' },
   ]);
 
+  // Sample contacts data
+  const [contacts, setContacts] = useState([
+    { id: 1, name: 'John Smith', account: 'Tech Corp', email: 'john@techcorp.com', phone: '+1-555-0123', owner: 'Sarah Johnson', created: '2024-01-15' },
+    { id: 2, name: 'Emily Davis', account: 'Innovation Labs', email: 'emily@innovlabs.com', phone: '+1-555-0124', owner: 'Mike Wilson', created: '2024-01-14' },
+    { id: 3, name: 'Michael Chen', account: 'StartupXYZ', email: 'michael@startupxyz.com', phone: '+1-555-0125', owner: 'Sarah Johnson', created: '2024-01-13' },
+    { id: 4, name: 'Lisa Rodriguez', account: 'Global Solutions', email: 'lisa@globalsol.com', phone: '+1-555-0126', owner: 'David Brown', created: '2024-01-12' },
+    { id: 5, name: 'Robert Kim', account: 'Digital Agency', email: 'robert@digitalag.com', phone: '+1-555-0127', owner: 'Sarah Johnson', created: '2024-01-11' },
+    { id: 6, name: 'Amanda Thompson', account: 'Eco Ventures', email: 'amanda@ecoventures.com', phone: '+1-555-0128', owner: 'Mike Wilson', created: '2024-01-10' },
+    { id: 7, name: 'Christopher Lee', account: 'FinTech Ltd', email: 'chris@fintech.com', phone: '+1-555-0129', owner: 'David Brown', created: '2024-01-09' },
+    { id: 8, name: 'Jennifer Martinez', account: 'Blue Ocean', email: 'jennifer@blueocean.com', phone: '+1-555-0130', owner: 'Sarah Johnson', created: '2024-01-08' },
+    { id: 9, name: 'Daniel Garcia', account: 'Blackstone', email: 'daniel@blackstone.com', phone: '+1-555-0131', owner: 'Mike Wilson', created: '2024-01-07' },
+    { id: 10, name: 'Stephanie Taylor', account: 'Red Solutions', email: 'stephanie@redsolutions.com', phone: '+1-555-0132', owner: 'David Brown', created: '2024-01-06' }
+  ]);
+
   const [newLead, setNewLead] = useState({
     name: '',
     company: '',
@@ -239,15 +256,16 @@ const App: React.FC = () => {
   });
 
   // Navigation items
-  const navItems = [
+  const navItems: Array<{
+    id: 'dashboard' | 'leads' | 'accounts' | 'contacts' | 'deals';
+    label: string;
+    icon: any;
+  }> = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'leads', label: 'Leads', icon: Users },
-    { id: 'accounts', label: 'Accounts', icon: Building },
     { id: 'contacts', label: 'Contacts', icon: Phone },
-    { id: 'deals', label: 'Deals', icon: HeartHandshake },
-    { id: 'quotes', label: 'Quotes', icon: FileText },
-    { id: 'orders', label: 'Orders', icon: ShoppingCart },
-    { id: 'products', label: 'Products', icon: Package },
+    { id: 'accounts', label: 'Accounts', icon: Building },
+    { id: 'deals', label: 'Opportunities', icon: HeartHandshake },
   ];
 
   // Chart data
@@ -395,6 +413,52 @@ const App: React.FC = () => {
     setSelectedLead(null);
   };
 
+  // Contact handlers
+  const handleContactClick = (contact: any) => {
+    setSelectedContact(contact);
+    setShowContactDetails(true);
+  };
+
+  const handleBackToContacts = () => {
+    setShowContactDetails(false);
+    setSelectedContact(null);
+  };
+
+  const handleContactActionClick = (action: string, contact: any) => {
+    if (action === 'view') {
+      handleContactClick(contact);
+    } else if (action === 'edit') {
+      console.log('Edit contact:', contact);
+    } else if (action === 'delete') {
+      setContacts(contacts.filter(c => c.id !== contact.id));
+    }
+    setShowContactActionMenu(null);
+  };
+
+  const handleSelectContact = (contactId: number) => {
+    if (selectedContacts.includes(contactId)) {
+      setSelectedContacts(selectedContacts.filter(id => id !== contactId));
+    } else {
+      setSelectedContacts([...selectedContacts, contactId]);
+    }
+  };
+
+  const handleSelectAllContacts = () => {
+    if (selectedContacts.length === contacts.length) {
+      setSelectedContacts([]);
+    } else {
+      setSelectedContacts(contacts.map(contact => contact.id));
+    }
+  };
+
+  const handleContactActionMenuClick = (contactId: number) => {
+    setShowContactActionMenu(showContactActionMenu === contactId ? null : contactId);
+  };
+
+  const handleContactSort = (field: string) => {
+    console.log('Sort contacts by:', field);
+  };
+
   const styles: { [key: string]: React.CSSProperties } = {
     container: {
       display: 'flex',
@@ -406,9 +470,9 @@ const App: React.FC = () => {
     },
     mainLayout: {
       display: 'flex',
-      marginLeft: sidebarCollapsed ? '50px' : '280px',
-      marginTop: '73px', // Height of header
-      height: 'calc(100vh - 73px)',
+      marginLeft: sidebarCollapsed ? '50px' : '224px',
+      marginTop: '36px', // Height of header
+      height: 'calc(100vh - 36px)',
       transition: 'margin-left 0.3s ease',
     },
     sidebar: {
@@ -416,8 +480,8 @@ const App: React.FC = () => {
       left: 0,
       top: 0,
       bottom: 0,
-      width: sidebarCollapsed ? '50px' : '280px',
-      backgroundColor: '#1e40af',
+      width: sidebarCollapsed ? '50px' : '224px',
+      backgroundColor: '#14235f',
       color: 'white',
       transition: 'width 0.3s ease',
       borderRight: '1px solid #e5e7eb',
@@ -428,55 +492,70 @@ const App: React.FC = () => {
       zIndex: 90,
     },
     sidebarHeader: {
-      padding: sidebarCollapsed ? '8px 0' : '16px',
+      padding: sidebarCollapsed ? '4px 0' : '4px 12px',
       borderBottom: sidebarCollapsed ? 'none' : '1px solid rgba(255, 255, 255, 0.1)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: sidebarCollapsed ? 'center' : 'space-between',
-      gap: '8px',
+      gap: '6px',
+      height: '36px',
+      minHeight: '36px',
+      maxHeight: '36px',
+      transition: 'padding 0.3s ease, justify-content 0.3s ease',
     },
     logo: {
-      display: sidebarCollapsed ? 'none' : 'flex',
+      display: 'flex',
       alignItems: 'center',
-      gap: '8px',
+      gap: sidebarCollapsed ? '0px' : '8px',
+      opacity: sidebarCollapsed ? 0 : 1,
+      width: sidebarCollapsed ? '0px' : 'auto',
+      overflow: 'hidden',
+      transition: 'gap 0.3s ease, opacity 0.3s ease, width 0.3s ease',
     },
     logoImg: {
-      width: sidebarCollapsed ? '24px' : '32px',
-      height: sidebarCollapsed ? '24px' : '32px',
-      display: sidebarCollapsed ? 'none' : 'block',
+      width: sidebarCollapsed ? '0px' : '24px',
+      height: sidebarCollapsed ? '0px' : '24px',
+      opacity: sidebarCollapsed ? 0 : 1,
+      overflow: 'hidden',
+      transition: 'width 0.3s ease, height 0.3s ease, opacity 0.3s ease',
     },
     logoText: {
-      fontSize: '18px',
+      fontSize: '16px',
       fontWeight: 'bold',
       color: 'white',
-      display: sidebarCollapsed ? 'none' : 'block',
+      opacity: sidebarCollapsed ? 0 : 1,
+      width: sidebarCollapsed ? '0px' : 'auto',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap' as const,
       letterSpacing: '0.5px',
+      transition: 'opacity 0.3s ease, width 0.3s ease',
     },
     toggleButton: {
       background: 'none',
       border: 'none',
       color: 'white',
       cursor: 'pointer',
-      padding: sidebarCollapsed ? '8px 0' : '6px',
-      borderRadius: '4px',
-      transition: 'background-color 0.2s',
-      width: sidebarCollapsed ? '34px' : 'auto',
-      height: sidebarCollapsed ? '34px' : 'auto',
+      padding: sidebarCollapsed ? '4px 0' : '4px',
+      borderRadius: '3px',
+      transition: 'background-color 0.2s, padding 0.3s ease, width 0.3s ease, height 0.3s ease',
+      width: sidebarCollapsed ? '26px' : 'auto',
+      height: sidebarCollapsed ? '26px' : 'auto',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
     },
     navList: {
       listStyle: 'none',
-      padding: sidebarCollapsed ? '4px 0' : '16px 0',
+      padding: sidebarCollapsed ? '2px 0' : '8px 0',
       margin: 0,
       flex: 1,
       display: 'flex',
       flexDirection: 'column' as React.CSSProperties['flexDirection'],
       alignItems: 'center' as React.CSSProperties['alignItems'],
+      transition: 'padding 0.3s ease',
     },
     navItem: {
-      margin: sidebarCollapsed ? '1px 0' : '4px 0',
+      margin: sidebarCollapsed ? '0.5px 0' : '2px 0',
       width: '100%',
       display: 'flex',
       justifyContent: 'center',
@@ -485,15 +564,15 @@ const App: React.FC = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
-      padding: sidebarCollapsed ? '8px 0' : '10px 16px',
-      color: 'white',
+      padding: sidebarCollapsed ? '6px 0' : '8px 16px',
+      color: sidebarCollapsed ? 'rgba(255, 255, 255, 0.9)' : 'white',
       textDecoration: 'none',
-      transition: 'background-color 0.2s',
+      transition: 'background-color 0.2s, color 0.3s ease',
       cursor: 'pointer',
       backgroundColor: 'transparent',
       border: 'none',
-      width: sidebarCollapsed ? '34px' : '100%',
-      height: sidebarCollapsed ? '34px' : '48px',
+      width: sidebarCollapsed ? '32px' : '100%',
+      height: sidebarCollapsed ? '32px' : '40px',
       fontSize: '14px',
     },
     navLinkActive: {
@@ -507,13 +586,20 @@ const App: React.FC = () => {
       justifyContent: 'center',
       width: '20px',
       height: '20px',
+      opacity: sidebarCollapsed ? 0.8 : 1,
+      transition: 'opacity 0.3s ease',
     },
     navText: {
-      display: sidebarCollapsed ? 'none' : 'block',
+      opacity: sidebarCollapsed ? 0 : 1,
+      width: sidebarCollapsed ? '0px' : 'auto',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap' as const,
+      transition: 'opacity 0.3s ease, width 0.3s ease',
     },
     sidebarFooter: {
-      padding: sidebarCollapsed ? '8px' : '16px',
+      padding: sidebarCollapsed ? '6px' : '12px',
       borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+      transition: 'padding 0.3s ease',
     },
     profileSection: {
       display: 'flex',
@@ -521,22 +607,26 @@ const App: React.FC = () => {
       padding: sidebarCollapsed ? '6px' : '8px 12px',
       borderRadius: '8px',
       cursor: 'pointer',
-      transition: 'background-color 0.2s',
+      transition: 'background-color 0.2s, padding 0.3s ease, justify-content 0.3s ease',
       justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
     },
     profileAvatar: {
-      width: sidebarCollapsed ? '24px' : '32px',
-      height: sidebarCollapsed ? '24px' : '32px',
+      width: sidebarCollapsed ? '18px' : '28px',
+      height: sidebarCollapsed ? '18px' : '28px',
       borderRadius: '50%',
       backgroundColor: 'rgba(255, 255, 255, 0.2)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      marginRight: sidebarCollapsed ? '0' : '12px',
+      marginRight: sidebarCollapsed ? '0' : '10px',
+      transition: 'width 0.3s ease, height 0.3s ease, margin-right 0.3s ease',
     },
     profileInfo: {
-      display: sidebarCollapsed ? 'none' : 'block',
-      flex: 1,
+      opacity: sidebarCollapsed ? 0 : 1,
+      width: sidebarCollapsed ? '0px' : 'auto',
+      overflow: 'hidden',
+      flex: sidebarCollapsed ? 0 : 1,
+      transition: 'opacity 0.3s ease, width 0.3s ease, flex 0.3s ease',
     },
     profileName: {
       fontSize: '14px',
@@ -556,23 +646,26 @@ const App: React.FC = () => {
       width: '100%',
     },
     header: {
-      backgroundColor: 'white',
-      padding: '16px 24px',
-      borderBottom: '1px solid #e5e7eb',
+      backgroundColor: '#14235f',
+      padding: '4px 16px',
+      borderBottom: 'none',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
       position: 'fixed' as const,
       top: 0,
-      left: sidebarCollapsed ? '50px' : '280px',
+      left: sidebarCollapsed ? '50px' : '224px',
       right: 0,
       zIndex: 80,
       transition: 'left 0.3s ease',
+      height: '36px',
+      minHeight: '36px',
+      maxHeight: '36px',
     },
     headerTitle: {
-      fontSize: '22px',
+      fontSize: '20px',
       fontWeight: '600',
-      color: '#1f2937',
+      color: 'white',
       margin: 0,
     },
     headerActions: {
@@ -584,14 +677,14 @@ const App: React.FC = () => {
       backgroundColor: '#3b82f6',
       color: 'white',
       border: 'none',
-      padding: '8px 16px',
-      borderRadius: '8px',
+      padding: '6px 12px',
+      borderRadius: '5px',
       cursor: 'pointer',
-      fontSize: '14px',
+      fontSize: '13px',
       fontWeight: '500',
       display: 'flex',
       alignItems: 'center',
-      gap: '8px',
+      gap: '6px',
       transition: 'background-color 0.2s',
     },
     buttonSecondary: {
@@ -602,10 +695,10 @@ const App: React.FC = () => {
     iconButton: {
       background: 'none',
       border: 'none',
-      padding: '8px',
-      borderRadius: '6px',
+      padding: '6px',
+      borderRadius: '4px',
       cursor: 'pointer',
-      color: '#6b7280',
+      color: 'rgba(255, 255, 255, 0.7)',
       transition: 'all 0.2s',
       display: 'flex',
       alignItems: 'center',
@@ -1035,7 +1128,13 @@ const App: React.FC = () => {
   };
 
   return (
-    <div style={styles.container}>
+    <div 
+      style={styles.container}
+      onClick={() => {
+        setShowActionMenu(null);
+        setShowContactActionMenu(null);
+      }}
+    >
       {/* Sidebar */}
       <div style={styles.sidebar}>
         <div style={styles.sidebarHeader}>
@@ -1053,7 +1152,7 @@ const App: React.FC = () => {
               e.currentTarget.style.backgroundColor = 'transparent';
             }}
           >
-            <Menu size={20} />
+            <Menu size={14} />
           </button>
         </div>
         <ul style={styles.navList}>
@@ -1079,7 +1178,7 @@ const App: React.FC = () => {
                     }
                   }}
                 >
-                  <Icon size={sidebarCollapsed ? 16 : 20} style={styles.navIcon} />
+                  <Icon size={sidebarCollapsed ? 12 : 18} style={styles.navIcon} />
                   <span style={styles.navText}>{item.label}</span>
                 </button>
               </li>
@@ -1099,53 +1198,70 @@ const App: React.FC = () => {
             }}
           >
             <div style={styles.profileAvatar}>
-              <User size={sidebarCollapsed ? 12 : 18} />
+              <User size={sidebarCollapsed ? 9 : 16} />
             </div>
             <div style={styles.profileInfo}>
               <div style={styles.profileName}>John Doe</div>
               <div style={styles.profileRole}>Admin</div>
             </div>
-            <Settings size={sidebarCollapsed ? 12 : 16} style={{display: sidebarCollapsed ? 'none' : 'block'}} />
+            <Settings 
+              size={sidebarCollapsed ? 10 : 14} 
+              style={{
+                opacity: sidebarCollapsed ? 0 : 1,
+                width: sidebarCollapsed ? '0px' : '14px',
+                transition: 'opacity 0.3s ease, width 0.3s ease'
+              }} 
+            />
           </div>
         </div>
       </div>
 
       {/* Header */}
       <div style={styles.header}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <h1 style={styles.headerTitle}>
-            {navItems.find(item => item.id === activeSection)?.label || 'Dashboard'}
-          </h1>
-          {/* Back button for lead details */}
-          {activeSection === 'leads' && showLeadDetails && selectedLead && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+          {/* Show back button inline with title only on leads/contacts details page */}
+          {((activeSection === 'leads' && showLeadDetails && selectedLead) || 
+            (activeSection === 'contacts' && showContactDetails && selectedContact)) && (
             <button
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                padding: '6px 12px',
-                backgroundColor: '#f1f5f9',
-                border: 'none',
-                borderRadius: '6px',
-                color: '#475569',
+                justifyContent: 'center',
+                padding: '4px',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '4px',
+                color: 'rgba(255, 255, 255, 0.9)',
                 cursor: 'pointer',
-                fontSize: '13px',
+                fontSize: '12px',
                 fontWeight: '500',
                 transition: 'all 0.2s',
-                width: 'fit-content'
+                width: '26px',
+                height: '26px'
               }}
-              onClick={handleBackToLeads}
+              onClick={() => {
+                if (activeSection === 'leads') {
+                  handleBackToLeads();
+                } else if (activeSection === 'contacts') {
+                  handleBackToContacts();
+                }
+              }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#e2e8f0';
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#f1f5f9';
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
               }}
+              title={activeSection === 'leads' ? "Back to Leads" : "Back to Contacts"}
             >
               <ArrowLeft size={14} />
-              Back to Leads
             </button>
           )}
+          
+          <h1 style={styles.headerTitle}>
+            {(activeSection === 'contacts' && showContactDetails && selectedContact) ? selectedContact.name :
+             navItems.find(item => item.id === activeSection)?.label || 'Dashboard'}
+          </h1>
         </div>
         <div style={styles.headerActions}>
           <div style={styles.dropdownContainer}>
@@ -1159,9 +1275,9 @@ const App: React.FC = () => {
                 e.currentTarget.style.backgroundColor = '#3b82f6';
               }}
             >
-              <Plus size={16} />
+              <Plus size={14} />
               Quick Actions
-              <ChevronDown size={14} />
+              <ChevronDown size={12} />
             </button>
             {showQuickActions && (
               <div style={styles.dropdownMenu}>
@@ -1215,62 +1331,39 @@ const App: React.FC = () => {
                   }}
                 >
                   <HeartHandshake size={16} />
-                  Create New Deal
+                  Create New Opportunity
                 </button>
-                <button
-                  style={styles.dropdownItem}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f3f4f6';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
-                >
-                  <QuoteIcon size={16} />
-                  Create Quote
-                </button>
-                <button
-                  style={styles.dropdownItem}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f3f4f6';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
-                >
-                  <ShoppingBag size={16} />
-                  Create Order
-                </button>
+
               </div>
             )}
           </div>
           <button
             style={styles.iconButton}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f3f4f6';
-              e.currentTarget.style.color = '#3b82f6';
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+              e.currentTarget.style.color = 'white';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = '#6b7280';
+              e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
             }}
           >
-            <Bell size={16} />
+            <Bell size={14} />
           </button>
           <button
             style={styles.iconButton}
             onClick={() => setRightSidebarCollapsed(!rightSidebarCollapsed)}
             title={rightSidebarCollapsed ? "Expand widgets" : "Collapse widgets"}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f3f4f6';
-              e.currentTarget.style.color = '#3b82f6';
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+              e.currentTarget.style.color = 'white';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = '#6b7280';
+              e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
             }}
           >
-            {rightSidebarCollapsed ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+            {rightSidebarCollapsed ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
           </button>
         </div>
       </div>
@@ -1925,7 +2018,6 @@ const App: React.FC = () => {
                   }}
                 >
                   <ArrowLeft size={16} />
-                  Back to Leads
                 </button>
               </div>
 
@@ -2258,8 +2350,57 @@ const App: React.FC = () => {
             />
           )}
 
+          {/* Contacts Section */}
+          {activeSection === 'contacts' && !showContactDetails && (
+            <div style={{...styles.contentHeader, marginBottom: '24px'}}>
+              <div style={styles.pageHeader}>
+                <h1 style={styles.pageTitle}>Contacts</h1>
+                <p style={styles.pageSubtitle}>Manage your contact relationships</p>
+              </div>
+
+              <div style={styles.pageActions}>
+                <button
+                  style={styles.primaryButton}
+                  onClick={() => console.log('Create contact')}
+                >
+                  <UserPlus size={20} />
+                  Create Contact
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'contacts' && !showContactDetails && (
+            <ContactsTable
+              contacts={contacts}
+              selectedContacts={selectedContacts}
+              showActionMenu={showContactActionMenu}
+              onSelectContact={handleSelectContact}
+              onSelectAllContacts={handleSelectAllContacts}
+              onActionMenuClick={handleContactActionMenuClick}
+              onActionClick={handleContactActionClick}
+              onContactClick={handleContactClick}
+              onSort={handleContactSort}
+              styles={styles}
+            />
+          )}
+
+          {/* Contact Details Page */}
+          {activeSection === 'contacts' && showContactDetails && selectedContact && (
+            <ContactDetails
+              contact={selectedContact}
+              onBack={handleBackToContacts}
+              onSave={(updatedContact) => {
+                setContacts(contacts.map(contact => 
+                  contact.id === updatedContact.id ? updatedContact : contact
+                ));
+                setSelectedContact(updatedContact);
+              }}
+            />
+          )}
+
           {/* Other sections placeholder */}
-          {activeSection !== 'dashboard' && activeSection !== 'leads' && (
+          {activeSection !== 'dashboard' && activeSection !== 'leads' && activeSection !== 'contacts' && (
             <div style={styles.card}>
               <h3 style={styles.cardTitle}>
                 {navItems.find(item => item.id === activeSection)?.label} Section

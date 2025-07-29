@@ -3,7 +3,6 @@ import {
   Building, 
   User, 
   CheckCircle,
-  MessageSquare,
   Paperclip,
   Clock,
   UserPlus,
@@ -186,11 +185,14 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
     taskDeadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   });
   const [logEmailModalPosition, setLogEmailModalPosition] = useState({ 
-    x: Math.max(50, window.innerWidth - 650), 
-    y: Math.max(50, window.innerHeight - 500) 
+    x: Math.max(50, window.innerWidth - 500), 
+    y: Math.max(50, window.innerHeight - 400) 
   });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  
+  // Pipeline hover state
+  const [hoveredStageIndex, setHoveredStageIndex] = useState<number | null>(null);
   
   const pipelineStages = [
     { id: 'New', label: 'New', number: 1 },
@@ -202,7 +204,9 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
-    { id: 'activity', label: 'Activity', icon: MessageSquare },
+    { id: 'emails', label: 'E-mails', icon: Mail },
+    { id: 'calls', label: 'Calls', icon: Phone },
+    { id: 'meetings', label: 'Meetings', icon: Video },
     { id: 'tasks', label: 'Tasks', icon: CheckCircle },
     { id: 'attachments', label: 'Attachments', icon: Paperclip },
     { id: 'timeline', label: 'Timeline', icon: Clock }
@@ -417,7 +421,7 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
 
   const handleDragMove = useCallback((e: MouseEvent) => {
     if (isDragging) {
-      const newX = Math.max(0, Math.min(window.innerWidth - 600, e.clientX - dragOffset.x));
+      const newX = Math.max(0, Math.min(window.innerWidth - 450, e.clientX - dragOffset.x));
       const newY = Math.max(0, Math.min(window.innerHeight - 100, e.clientY - dragOffset.y));
       
       setLogEmailModalPosition({
@@ -943,128 +947,116 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
       cursor: 'pointer',
       transition: 'background-color 0.2s'
     },
-    // Pipeline styles
+    // Pipeline styles - Sleek pencil-like design
     pipelineContainer: {
       backgroundColor: 'white',
-      borderRadius: '8px',
+      borderRadius: '12px',
       border: '1px solid #e2e8f0',
       margin: '0 8px 8px 8px',
-      padding: '12px',
-      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+      padding: '16px 20px',
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.06)',
       flexShrink: 0
     },
     pipelineSteps: {
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '0'
+      justifyContent: 'center',
+      gap: '0',
+      overflow: 'hidden'
     },
     pipelineStepsContainer: {
       display: 'flex',
       alignItems: 'center',
-      flex: 1
+      flex: 1,
+      gap: '0',
+      justifyContent: 'center'
     },
     stage: {
-      display: 'flex',
-      alignItems: 'center',
-      padding: '8px 20px 8px 16px',
-      fontSize: '12px',
-      fontWeight: '600',
-      transition: 'all 0.3s',
       position: 'relative' as const,
-      cursor: 'pointer',
-      minWidth: '140px',
-      height: '50px'
-    },
-    stageCompleted: {
-      color: 'white',
-      backgroundColor: '#1e40af'
-    },
-    stageActive: {
-      color: 'white',
-      backgroundColor: '#2563eb'
-    },
-    stageInactive: {
-      color: '#6b7280',
-      backgroundColor: '#e2e8f0'
-    },
-    stageContent: {
       display: 'flex',
-      flexDirection: 'column' as const,
       alignItems: 'center',
       justifyContent: 'center',
-      textAlign: 'center' as const,
-      flex: 1
+      cursor: 'pointer',
+      fontSize: '12px',
+      fontWeight: '600',
+      transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+      marginRight: '-2px',
+      zIndex: 1
     },
-    stageHeader: {
-      marginBottom: '4px'
+    stageHover: {
+      transform: 'scale(1.02)',
+      zIndex: 10,
+      filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15))'
+    },
+
+    stageChevron: {
+      position: 'relative' as const,
+      width: '120px',
+      height: '36px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+      filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))'
+    },
+    stageContent: {
+      position: 'relative' as const,
+      zIndex: 2,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '100%',
+      height: '100%',
+      color: 'white',
+      padding: '6px 12px',
+      textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
     },
     stageLabel: {
-      fontSize: '11px',
-      fontWeight: '600',
-      textTransform: 'uppercase' as const,
-      letterSpacing: '0.5px'
-    },
-    stageStats: {
-      display: 'flex',
-      flexDirection: 'column' as const,
-      alignItems: 'center',
-      gap: '1px'
-    },
-    stageDealCount: {
       fontSize: '12px',
-      fontWeight: '700'
+      fontWeight: '600',
+      whiteSpace: 'nowrap' as const,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
     },
-    stagePercentage: {
-      fontSize: '10px',
-      fontWeight: '500',
-      opacity: 0.9
-    },
-    stageArrow: {
-      position: 'absolute' as const,
-      right: 0,
-      top: '50%',
-      transform: 'translateY(-50%) translateX(50%)',
-      zIndex: 10,
-      width: 0,
-      height: 0,
-      borderTop: '25px solid transparent',
-      borderBottom: '25px solid transparent',
-      borderLeft: '15px solid'
-    },
-    closeDealButtons: {
+
+
+    closeOpportunityButtons: {
       display: 'flex',
-      flexDirection: 'column' as const,
-      gap: '6px',
-      marginLeft: '12px'
+      gap: '8px',
+      marginLeft: '16px'
     },
-    closeDealWonButton: {
+    closeOpportunityOptions: {
+      display: 'flex',
+      gap: '8px',
+      marginLeft: '16px'
+    },
+    closeOpportunityWonButton: {
       display: 'flex',
       alignItems: 'center',
-      gap: '4px',
-      padding: '6px 12px',
+      gap: '6px',
+      padding: '8px 16px',
       backgroundColor: '#16a34a',
       color: 'white',
-      fontSize: '11px',
-      borderRadius: '4px',
+      fontSize: '13px',
+      borderRadius: '6px',
       border: 'none',
       cursor: 'pointer',
-      fontWeight: '600',
+      fontWeight: '500',
       transition: 'background-color 0.2s',
       whiteSpace: 'nowrap' as const
     },
-    closeDealLostButton: {
+    closeOpportunityLostButton: {
       display: 'flex',
       alignItems: 'center',
-      gap: '4px',
-      padding: '6px 12px',
+      gap: '6px',
+      padding: '8px 16px',
       backgroundColor: '#dc2626',
       color: 'white',
-      fontSize: '11px',
-      borderRadius: '4px',
+      fontSize: '13px',
+      borderRadius: '6px',
       border: 'none',
       cursor: 'pointer',
-      fontWeight: '600',
+      fontWeight: '500',
       transition: 'background-color 0.2s',
       whiteSpace: 'nowrap' as const
     },
@@ -1578,12 +1570,12 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
       position: 'absolute' as const,
       backgroundColor: 'white',
       borderRadius: '8px',
-      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-      width: '600px',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      width: '450px',
       maxWidth: '90vw',
-      maxHeight: '80vh',
+      maxHeight: '70vh',
       overflow: 'hidden',
-      border: '1px solid #e2e8f0',
+      border: '1px solid #e5e7eb',
       pointerEvents: 'auto' as const
     },
     logEmailModalExpanded: {
@@ -1593,13 +1585,13 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
       transform: 'translate(-50%, -50%)',
       backgroundColor: 'white',
       borderRadius: '8px',
-      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-      width: '900px',
-      height: '700px',
+      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+      width: '700px',
+      height: '600px',
       maxWidth: '95vw',
-      maxHeight: '95vh',
+      maxHeight: '90vh',
       overflow: 'hidden',
-      border: '1px solid #e2e8f0',
+      border: '1px solid #e5e7eb',
       pointerEvents: 'auto' as const,
       zIndex: 1001
     },
@@ -1616,19 +1608,20 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '16px 20px',
-      backgroundColor: '#2563eb',
+      padding: '12px 16px',
+      backgroundColor: '#14235f',
       color: 'white',
       cursor: 'move',
-      userSelect: 'none' as const
+      userSelect: 'none' as const,
+      borderBottom: '1px solid #e5e7eb'
     },
     logEmailTitle: {
-      fontSize: '16px',
+      fontSize: '14px',
       fontWeight: '600',
       margin: 0,
       display: 'flex',
       alignItems: 'center',
-      gap: '8px'
+      gap: '6px'
     },
     logEmailHeaderActions: {
       display: 'flex',
@@ -1647,90 +1640,91 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
       transition: 'background-color 0.2s'
     },
     logEmailBody: {
-      padding: '20px',
-      maxHeight: 'calc(80vh - 140px)',
+      padding: '16px',
+      maxHeight: 'calc(70vh - 120px)',
       overflowY: 'auto' as const
     },
     logEmailBodyExpanded: {
-      padding: '24px',
-      height: 'calc(700px - 140px)',
+      padding: '20px',
+      height: 'calc(600px - 120px)',
       overflowY: 'auto' as const
     },
     logEmailFormSection: {
-      marginBottom: '20px'
+      marginBottom: '16px'
     },
     logEmailFormRow: {
       display: 'flex',
-      gap: '20px',
-      marginBottom: '20px',
+      gap: '12px',
+      marginBottom: '16px',
       alignItems: 'flex-end',
       flexWrap: 'wrap' as const
     },
     logEmailFormField: {
       flex: 1,
-      minWidth: '200px',
+      minWidth: '150px',
       display: 'flex',
       flexDirection: 'column' as const
     },
     logEmailFormFieldHalf: {
-      flex: '0 0 calc(50% - 10px)',
-      minWidth: '200px',
+      flex: '0 0 calc(50% - 6px)',
+      minWidth: '140px',
       display: 'flex',
       flexDirection: 'column' as const
     },
     logEmailFormFieldThird: {
-      flex: '0 0 calc(33.333% - 14px)',
-      minWidth: '150px',
+      flex: '0 0 calc(33.333% - 8px)',
+      minWidth: '100px',
       display: 'flex',
       flexDirection: 'column' as const
     },
     logEmailLabel: {
       display: 'block',
-      fontSize: '12px',
-      fontWeight: '600',
+      fontSize: '13px',
+      fontWeight: '500',
       color: '#374151',
-      marginBottom: '6px',
-      textTransform: 'uppercase' as const,
-      letterSpacing: '0.5px'
+      marginBottom: '4px'
     },
     logEmailInput: {
       width: '100%',
-      padding: '10px 12px',
+      padding: '8px 10px',
       border: '1px solid #d1d5db',
       borderRadius: '6px',
-      fontSize: '14px',
-      transition: 'border-color 0.2s, box-shadow 0.2s',
-      backgroundColor: 'white'
+      fontSize: '13px',
+      transition: 'border-color 0.2s',
+      backgroundColor: 'white',
+      boxSizing: 'border-box' as const
     },
     logEmailTextarea: {
       width: '100%',
-      minHeight: '120px',
-      padding: '12px',
+      minHeight: '100px',
+      padding: '10px',
       border: '1px solid #d1d5db',
       borderRadius: '6px',
-      fontSize: '14px',
+      fontSize: '13px',
       resize: 'vertical' as const,
       fontFamily: 'inherit',
       backgroundColor: 'white',
-      transition: 'border-color 0.2s, box-shadow 0.2s'
+      transition: 'border-color 0.2s',
+      boxSizing: 'border-box' as const
     },
     logEmailTextareaExpanded: {
       width: '100%',
-      minHeight: '200px',
-      padding: '12px',
+      minHeight: '150px',
+      padding: '10px',
       border: '1px solid #d1d5db',
       borderRadius: '6px',
-      fontSize: '14px',
+      fontSize: '13px',
       resize: 'vertical' as const,
       fontFamily: 'inherit',
       backgroundColor: 'white',
-      transition: 'border-color 0.2s, box-shadow 0.2s'
+      transition: 'border-color 0.2s',
+      boxSizing: 'border-box' as const
     },
     logEmailToolbar: {
       display: 'flex',
       alignItems: 'center',
       gap: '4px',
-      padding: '10px 12px',
+      padding: '8px 10px',
       borderBottom: '1px solid #e2e8f0',
       backgroundColor: '#f8fafc',
       flexWrap: 'wrap' as const,
@@ -1741,8 +1735,8 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      width: '32px',
-      height: '32px',
+      width: '28px',
+      height: '28px',
       border: 'none',
       backgroundColor: 'transparent',
       borderRadius: '4px',
@@ -1759,15 +1753,15 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
     logEmailContentContainer: {
       border: '1px solid #d1d5db',
       borderRadius: '6px',
-      marginBottom: '20px',
+      marginBottom: '16px',
       overflow: 'hidden'
     },
     logEmailTaskSection: {
       backgroundColor: '#f8fafc',
       border: '1px solid #e2e8f0',
-      borderRadius: '8px',
-      padding: '18px',
-      marginBottom: '20px'
+      borderRadius: '6px',
+      padding: '12px',
+      marginBottom: '16px'
     },
     logEmailTaskHeader: {
       fontSize: '13px',
@@ -1801,43 +1795,45 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
       marginLeft: '26px'
     },
     logEmailTaskInput: {
-      padding: '8px 10px',
+      padding: '6px 8px',
       border: '1px solid #d1d5db',
       borderRadius: '6px',
-      fontSize: '12px',
+      fontSize: '13px',
       flex: 1,
-      transition: 'border-color 0.2s'
+      transition: 'border-color 0.2s',
+      boxSizing: 'border-box' as const
     },
     logEmailTaskSelect: {
-      padding: '8px 10px',
+      padding: '6px 8px',
       border: '1px solid #d1d5db',
       borderRadius: '6px',
-      fontSize: '12px',
+      fontSize: '13px',
       backgroundColor: 'white',
       cursor: 'pointer',
-      transition: 'border-color 0.2s'
+      transition: 'border-color 0.2s',
+      boxSizing: 'border-box' as const
     },
     logEmailFooter: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      paddingTop: '20px',
+      paddingTop: '16px',
       borderTop: '1px solid #e2e8f0'
     },
     logEmailAssociated: {
       fontSize: '12px',
-      color: '#2563eb',
+      color: '#3b82f6',
       cursor: 'pointer',
       textDecoration: 'none'
     },
     logEmailSubmitButton: {
-      backgroundColor: '#2563eb',
+      backgroundColor: '#3b82f6',
       color: 'white',
       border: 'none',
       borderRadius: '6px',
-      padding: '12px 24px',
-      fontSize: '14px',
-      fontWeight: '600',
+      padding: '8px 16px',
+      fontSize: '13px',
+      fontWeight: '500',
       cursor: 'pointer',
       transition: 'background-color 0.2s'
     },
@@ -2117,76 +2113,76 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
           <div style={styles.pipelineStepsContainer}>
             {pipelineStages.map((stage, index) => {
               const status = getStageStatus(stage, index);
+              const isHovered = hoveredStageIndex === index;
+              
+              // Determine background color based on status
+              const getStageColor = () => {
+                if (status.completed || status.active) return '#14235f'; // Dark blue for active/completed
+                return '#93c5fd'; // Light blue for default state
+              };
+
+              const getHoverColor = () => {
+                if (status.completed || status.active) return '#1e3a8a'; // Slightly lighter dark blue on hover
+                return '#7dd3fc'; // Slightly lighter blue on hover
+              };
               
               return (
                 <div
                   key={stage.id}
                   style={{
                     ...styles.stage,
-                    ...(status.completed ? styles.stageCompleted : {}),
-                    ...(status.active ? styles.stageActive : {}),
-                    ...(status.inactive ? styles.stageInactive : {})
+                    ...(isHovered ? styles.stageHover : {})
                   }}
                   onClick={() => handleStageChange(stage.id)}
+                  onMouseEnter={() => setHoveredStageIndex(index)}
+                  onMouseLeave={() => setHoveredStageIndex(null)}
                 >
-                  <div style={styles.stageContent}>
-                    <div style={styles.stageHeader}>
+                  {/* Sleek pencil-like arrow shape */}
+                  <div 
+                    style={{
+                      ...styles.stageChevron,
+                      backgroundColor: isHovered ? getHoverColor() : getStageColor(),
+                      clipPath: index === 0 
+                        ? 'polygon(0% 0%, calc(100% - 12px) 0%, 100% 50%, calc(100% - 12px) 100%, 0% 100%)'
+                        : index === pipelineStages.length - 1
+                        ? 'polygon(12px 0%, 100% 0%, 100% 100%, 12px 100%, 0% 50%)'
+                        : 'polygon(12px 0%, calc(100% - 12px) 0%, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0% 50%)',
+                      transform: isHovered ? 'translateY(-1px)' : 'translateY(0)',
+                      boxShadow: isHovered 
+                        ? '0 4px 12px rgba(0, 0, 0, 0.15)' 
+                        : '0 2px 4px rgba(0, 0, 0, 0.08)'
+                    }}
+                  >
+                    <div style={styles.stageContent}>
                       <span style={styles.stageLabel}>{stage.label}</span>
                     </div>
-                    <div style={styles.stageStats}>
-                      <span style={styles.stageDealCount}>
-                        {stage.number === 1 ? '13 Deals' : 
-                         stage.number === 2 ? '10 Deals' : 
-                         stage.number === 3 ? '7 Deals' : 
-                         stage.number === 4 ? '5 Deals' :
-                         '3 Deals'}
-                      </span>
-                      <span style={styles.stagePercentage}>
-                        {stage.number === 1 ? '80%' : 
-                         stage.number === 2 ? '70%' : 
-                         stage.number === 3 ? '71%' : 
-                         stage.number === 4 ? '80%' :
-                         '90%'}
-                      </span>
-                    </div>
                   </div>
-                  
-                  {/* Arrow shape */}
-                  {index < pipelineStages.length - 1 && (
-                    <div
-                      style={{
-                        ...styles.stageArrow,
-                        borderLeftColor: status.completed ? '#1e40af' : 
-                                       status.active ? '#2563eb' : '#e2e8f0'
-                      }}
-                    />
-                  )}
                 </div>
               );
             })}
           </div>
           
-          {currentIndex === pipelineStages.length - 2 && currentStage === 'Proposed' && (
-            <div style={styles.closeDealButtons}>
+          {currentStage === 'Closed' && (
+            <div style={styles.closeOpportunityButtons}>
               <button
-                style={styles.closeDealWonButton}
+                style={styles.closeOpportunityWonButton}
                 onClick={() => {
-                  console.log('Deal won');
-                  handleStageChange('Closed');
+                  console.log('Opportunity won');
+                  // Handle opportunity won logic here
                 }}
               >
                 <CheckCircle size={12} />
-                Close Deal as Won
+                Close Opportunity as Won
               </button>
               <button
-                style={styles.closeDealLostButton}
+                style={styles.closeOpportunityLostButton}
                 onClick={() => {
-                  console.log('Deal lost');
-                  handleStageChange('Lost');
+                  console.log('Opportunity lost');
+                  // Handle opportunity lost logic here
                 }}
               >
                 <X size={12} />
-                Close Deal as Lost
+                Close Opportunity as Lost
               </button>
             </div>
           )}
@@ -2269,8 +2265,10 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
 
 
 
-  const renderActivityTab = () => {
-    // Sample data for each activity type
+
+
+  const renderEmailsTab = () => {
+    // Sample email data
     const emailHistory = [
       {
         id: 1,
@@ -2295,47 +2293,7 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
       }
     ];
 
-    const callHistory = [
-      {
-        id: 1,
-        type: 'Outbound',
-        duration: '15 mins',
-        date: '2024-01-16',
-        time: '11:00 AM',
-        status: 'Completed'
-      },
-      {
-        id: 2,
-        type: 'Inbound',
-        duration: '8 mins',
-        date: '2024-01-13',
-        time: '3:30 PM',
-        status: 'Completed'
-      }
-    ];
-
-    const meetingHistory = [
-      {
-        id: 1,
-        title: 'Project Requirements Discussion',
-        type: 'Video Call',
-        date: '2024-01-17',
-        time: '2:00 PM',
-        duration: '30 mins',
-        status: 'Scheduled'
-      },
-      {
-        id: 2,
-        title: 'Initial Discovery Meeting',
-        type: 'In-Person',
-        date: '2024-01-10',
-        time: '10:00 AM',
-        duration: '45 mins',
-        status: 'Completed'
-      }
-    ];
-
-    const renderActivityBox = (title: string, icon: any, data: any[], headers: string[], renderRow: (item: any) => React.ReactNode, primaryAction: string, secondaryAction: string) => {
+    const renderEmailActivityBox = (title: string, icon: any, data: any[], headers: string[], renderRow: (item: any) => React.ReactNode, primaryAction: string, secondaryAction: string) => {
       const IconComponent = icon;
       
       return (
@@ -2346,46 +2304,46 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
               {title}
             </div>
             <div style={styles.activityActions}>
-                             <button 
-                 style={styles.activitySecondaryButton}
-                 onMouseEnter={(e) => {
-                   (e.target as HTMLElement).style.backgroundColor = '#f3f4f6';
-                   (e.target as HTMLElement).style.borderColor = '#9ca3af';
-                 }}
-                 onMouseLeave={(e) => {
-                   (e.target as HTMLElement).style.backgroundColor = 'transparent';
-                   (e.target as HTMLElement).style.borderColor = '#d1d5db';
-                 }}
-                 onClick={() => {
-                   if (secondaryAction === 'Create Email') {
-                     setShowCreateEmailModal(true);
-                   } else {
-                     console.log(`${secondaryAction} clicked`);
-                   }
-                 }}
-               >
-                 <Plus size={12} />
-                 {secondaryAction}
-               </button>
-                             <button 
-                 style={styles.activityActionButton}
-                 onMouseEnter={(e) => {
-                   (e.target as HTMLElement).style.backgroundColor = '#1d4ed8';
-                 }}
-                 onMouseLeave={(e) => {
-                   (e.target as HTMLElement).style.backgroundColor = '#2563eb';
-                 }}
-                 onClick={() => {
-                   if (primaryAction === 'Log Email') {
-                     setShowLogEmailModal(true);
-                   } else {
-                     console.log(`${primaryAction} clicked`);
-                   }
-                 }}
-               >
-                 <FileText size={12} />
-                 {primaryAction}
-               </button>
+              <button 
+                style={styles.activitySecondaryButton}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#f3f4f6';
+                  (e.target as HTMLElement).style.borderColor = '#9ca3af';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                  (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                }}
+                onClick={() => {
+                  if (secondaryAction === 'Create Email') {
+                    setShowCreateEmailModal(true);
+                  } else {
+                    console.log(`${secondaryAction} clicked`);
+                  }
+                }}
+              >
+                <Plus size={12} />
+                {secondaryAction}
+              </button>
+              <button 
+                style={styles.activityActionButton}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#1d4ed8';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#2563eb';
+                }}
+                onClick={() => {
+                  if (primaryAction === 'Log Email') {
+                    setShowLogEmailModal(true);
+                  } else {
+                    console.log(`${primaryAction} clicked`);
+                  }
+                }}
+              >
+                <FileText size={12} />
+                {primaryAction}
+              </button>
             </div>
           </div>
           
@@ -2428,61 +2386,168 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
 
     return (
       <div style={styles.activityContainer}>
-        {/* Email Box */}
-        {renderActivityBox(
-          'Email',
+        {renderEmailActivityBox(
+          'Email History',
           Mail,
           emailHistory,
           ['Subject', 'Direction', 'Date', 'Time'],
-                     (email) => (
-             <>
-               <td style={styles.activityTableCell}>
-                 <span 
-                   style={{
-                     color: '#2563eb',
-                     cursor: 'pointer',
-                     textDecoration: 'none'
-                   }}
-                   onClick={() => {
-                     setLogEmailForm(prev => ({
-                       ...prev,
-                       content: `Re: ${email.subject}`
-                     }));
-                     setShowLogEmailModal(true);
-                   }}
-                   onMouseEnter={(e) => {
-                     (e.target as HTMLElement).style.textDecoration = 'underline';
-                   }}
-                   onMouseLeave={(e) => {
-                     (e.target as HTMLElement).style.textDecoration = 'none';
-                   }}
-                 >
-                   {email.subject}
-                 </span>
-               </td>
-               <td style={styles.activityTableCell}>
-                 <span style={{
-                   padding: '2px 8px',
-                   borderRadius: '12px',
-                   fontSize: '10px',
-                   fontWeight: '500',
-                   backgroundColor: email.direction === 'Sent' ? '#dcfce7' : '#dbeafe',
-                   color: email.direction === 'Sent' ? '#16a34a' : '#2563eb'
-                 }}>
-                   {email.direction}
-                 </span>
-               </td>
-               <td style={styles.activityTableCell}>{email.date}</td>
-               <td style={styles.activityTableCell}>{email.time}</td>
-             </>
-           ),
+          (email) => (
+            <>
+              <td style={styles.activityTableCell}>
+                <span 
+                  style={{
+                    color: '#2563eb',
+                    cursor: 'pointer',
+                    textDecoration: 'none'
+                  }}
+                  onClick={() => {
+                    setLogEmailForm(prev => ({
+                      ...prev,
+                      content: `Re: ${email.subject}`
+                    }));
+                    setShowLogEmailModal(true);
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.target as HTMLElement).style.textDecoration = 'underline';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.target as HTMLElement).style.textDecoration = 'none';
+                  }}
+                >
+                  {email.subject}
+                </span>
+              </td>
+              <td style={styles.activityTableCell}>
+                <span style={{
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  fontSize: '10px',
+                  fontWeight: '500',
+                  backgroundColor: email.direction === 'Sent' ? '#dcfce7' : '#dbeafe',
+                  color: email.direction === 'Sent' ? '#16a34a' : '#2563eb'
+                }}>
+                  {email.direction}
+                </span>
+              </td>
+              <td style={styles.activityTableCell}>{email.date}</td>
+              <td style={styles.activityTableCell}>{email.time}</td>
+            </>
+          ),
           'Log Email',
           'Create Email'
         )}
+      </div>
+    );
+  };
 
-        {/* Call Box */}
-        {renderActivityBox(
-          'Call',
+  const renderCallsTab = () => {
+    // Sample call data
+    const callHistory = [
+      {
+        id: 1,
+        type: 'Outbound',
+        duration: '15 mins',
+        date: '2024-01-16',
+        time: '11:00 AM',
+        status: 'Completed'
+      },
+      {
+        id: 2,
+        type: 'Inbound',
+        duration: '8 mins',
+        date: '2024-01-13',
+        time: '3:30 PM',
+        status: 'Completed'
+      }
+    ];
+
+    const renderCallActivityBox = (title: string, icon: any, data: any[], headers: string[], renderRow: (item: any) => React.ReactNode, primaryAction: string, secondaryAction: string) => {
+      const IconComponent = icon;
+      
+      return (
+        <div style={styles.activityBox}>
+          <div style={styles.activityHeader}>
+            <div style={styles.activityTitle}>
+              <IconComponent size={16} />
+              {title}
+            </div>
+            <div style={styles.activityActions}>
+              <button 
+                style={styles.activitySecondaryButton}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#f3f4f6';
+                  (e.target as HTMLElement).style.borderColor = '#9ca3af';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                  (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                }}
+                onClick={() => {
+                  console.log(`${secondaryAction} clicked`);
+                }}
+              >
+                <Plus size={12} />
+                {secondaryAction}
+              </button>
+              <button 
+                style={styles.activityActionButton}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#1d4ed8';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#2563eb';
+                }}
+                onClick={() => {
+                  console.log(`${primaryAction} clicked`);
+                }}
+              >
+                <FileText size={12} />
+                {primaryAction}
+              </button>
+            </div>
+          </div>
+          
+          {data.length > 0 ? (
+            <table style={styles.activityTable}>
+              <thead style={styles.activityTableHeader}>
+                <tr>
+                  {headers.map((header, index) => (
+                    <th key={index} style={styles.activityTableHeaderCell}>
+                      {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((item) => (
+                  <tr 
+                    key={item.id} 
+                    style={styles.activityTableRow}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.backgroundColor = 'white';
+                    }}
+                  >
+                    {renderRow(item)}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div style={styles.activityEmptyState}>
+              No {title.toLowerCase()} history found
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    return (
+      <div style={styles.activityContainer}>
+        {renderCallActivityBox(
+          'Call History',
           Phone,
           callHistory,
           ['Type', 'Duration', 'Date', 'Time', 'Status'],
@@ -2509,10 +2574,120 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
           'Log Call',
           'Create Call'
         )}
+      </div>
+    );
+  };
 
-        {/* Meeting Box */}
-        {renderActivityBox(
-          'Meeting',
+  const renderMeetingsTab = () => {
+    // Sample meeting data
+    const meetingHistory = [
+      {
+        id: 1,
+        title: 'Project Requirements Discussion',
+        type: 'Video Call',
+        date: '2024-01-17',
+        time: '2:00 PM',
+        duration: '30 mins',
+        status: 'Scheduled'
+      },
+      {
+        id: 2,
+        title: 'Initial Discovery Meeting',
+        type: 'In-Person',
+        date: '2024-01-10',
+        time: '10:00 AM',
+        duration: '45 mins',
+        status: 'Completed'
+      }
+    ];
+
+    const renderMeetingActivityBox = (title: string, icon: any, data: any[], headers: string[], renderRow: (item: any) => React.ReactNode, primaryAction: string, secondaryAction: string) => {
+      const IconComponent = icon;
+      
+      return (
+        <div style={styles.activityBox}>
+          <div style={styles.activityHeader}>
+            <div style={styles.activityTitle}>
+              <IconComponent size={16} />
+              {title}
+            </div>
+            <div style={styles.activityActions}>
+              <button 
+                style={styles.activitySecondaryButton}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#f3f4f6';
+                  (e.target as HTMLElement).style.borderColor = '#9ca3af';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                  (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                }}
+                onClick={() => {
+                  console.log(`${secondaryAction} clicked`);
+                }}
+              >
+                <Plus size={12} />
+                {secondaryAction}
+              </button>
+              <button 
+                style={styles.activityActionButton}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#1d4ed8';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#2563eb';
+                }}
+                onClick={() => {
+                  console.log(`${primaryAction} clicked`);
+                }}
+              >
+                <FileText size={12} />
+                {primaryAction}
+              </button>
+            </div>
+          </div>
+          
+          {data.length > 0 ? (
+            <table style={styles.activityTable}>
+              <thead style={styles.activityTableHeader}>
+                <tr>
+                  {headers.map((header, index) => (
+                    <th key={index} style={styles.activityTableHeaderCell}>
+                      {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((item) => (
+                  <tr 
+                    key={item.id} 
+                    style={styles.activityTableRow}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.backgroundColor = 'white';
+                    }}
+                  >
+                    {renderRow(item)}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div style={styles.activityEmptyState}>
+              No {title.toLowerCase()} history found
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    return (
+      <div style={styles.activityContainer}>
+        {renderMeetingActivityBox(
+          'Meeting History',
           Video,
           meetingHistory,
           ['Title', 'Type', 'Date', 'Time', 'Duration', 'Status'],
@@ -2808,8 +2983,12 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
     switch (activeTab) {
       case 'overview':
         return renderOverviewTab();
-      case 'activity':
-        return renderActivityTab();
+      case 'emails':
+        return renderEmailsTab();
+      case 'calls':
+        return renderCallsTab();
+      case 'meetings':
+        return renderMeetingsTab();
       case 'tasks':
         return renderTasksTab();
       case 'attachments':
@@ -2958,7 +3137,7 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
                   borderRadius: '0',
                   marginBottom: 0
                 }}
-                placeholder="Start typing to log an email..."
+                placeholder="Enter email content..."
                 value={logEmailForm.content}
                 onChange={(e) => handleLogEmailFormChange('content', e.target.value)}
               />
@@ -3054,14 +3233,14 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
               <span style={styles.logEmailAssociated}>
                 Associated with 2 records
               </span>
-              <button
+                              <button
                 style={styles.logEmailSubmitButton}
                 onClick={handleLogEmailSubmit}
                 onMouseEnter={(e) => {
-                  (e.target as HTMLElement).style.backgroundColor = '#1d4ed8';
+                  (e.target as HTMLElement).style.backgroundColor = '#2563eb';
                 }}
                 onMouseLeave={(e) => {
-                  (e.target as HTMLElement).style.backgroundColor = '#2563eb';
+                  (e.target as HTMLElement).style.backgroundColor = '#3b82f6';
                 }}
               >
                 Log email
