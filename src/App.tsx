@@ -1434,6 +1434,8 @@ const App: React.FC = () => {
                   handleBackToContacts();
                 } else if (activeSection === 'accounts') {
                   handleBackToAccounts();
+                } else if (activeSection === 'deals') {
+                  handleBackToOpportunities();
                 }
               }}
               onMouseEnter={(e) => {
@@ -1443,7 +1445,9 @@ const App: React.FC = () => {
                 e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
               }}
               title={activeSection === 'leads' ? "Back to Leads" : 
-                     activeSection === 'contacts' ? "Back to Contacts" : "Back to Accounts"}
+                     activeSection === 'contacts' ? "Back to Contacts" : 
+                     activeSection === 'accounts' ? "Back to Accounts" : 
+                     activeSection === 'deals' ? "Back to Opportunities" : "Back"}
             >
               <ArrowLeft size={14} />
             </button>
@@ -3059,8 +3063,82 @@ const App: React.FC = () => {
               }}
             />
           )}
+          {/* Opportunities Section */}
+          {activeSection === 'deals' && !showOpportunityDetails && (
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
+                <h3 style={styles.cardTitle}>Opportunities Management</h3>
+                <button
+                  style={styles.button}
+                  onClick={() => console.log('Create new opportunity')}
+                >
+                  <Plus size={16} />
+                  New Opportunity
+                </button>
+              </div>
+              <div style={styles.toolbar}>
+                <div style={styles.toolbarLeft}>
+                  <div style={styles.searchBox}>
+                    <Search size={16} style={styles.searchIcon} />
+                    <input
+                      type="text"
+                      placeholder="Search opportunities..."
+                      style={styles.searchInput}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <div style={styles.filterGroup}>
+                    <select
+                      style={styles.select}
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                    >
+                      <option value="all">All Stages</option>
+                      <option value="Prospecting">Prospecting</option>
+                      <option value="Qualification">Qualification</option>
+                      <option value="Needs Analysis">Needs Analysis</option>
+                      <option value="Proposal">Proposal</option>
+                      <option value="Negotiation">Negotiation</option>
+                      <option value="Closed Won">Closed Won</option>
+                      <option value="Closed Lost">Closed Lost</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <OpportunitiesTable
+                opportunities={filteredOpportunities}
+                selectedOpportunities={selectedOpportunities}
+                showActionMenu={showOpportunityActionMenu}
+                onSelectOpportunity={handleSelectOpportunity}
+                onSelectAllOpportunities={handleSelectAllOpportunities}
+                onActionMenuClick={(id) => setShowOpportunityActionMenu(showOpportunityActionMenu === id ? null : id)}
+                onActionClick={handleOpportunityActionClick}
+                onOpportunityClick={handleOpportunityClick}
+                onSort={(field) => {
+                  setSortField(field);
+                  setSortDirection(sortField === field && sortDirection === 'asc' ? 'desc' : 'asc');
+                }}
+                getStageStyle={getStageStyle}
+                styles={styles}
+              />
+            </div>
+          )}
+          {/* Opportunity Details Page */}
+          {activeSection === 'deals' && showOpportunityDetails && selectedOpportunity && (
+            <OpportunityDetails
+              opportunity={selectedOpportunity}
+              onBack={handleBackToOpportunities}
+              onSave={(updatedOpportunity) => {
+                setOpportunities(opportunities.map(opportunity => 
+                  opportunity.id === updatedOpportunity.id ? updatedOpportunity : opportunity
+                ));
+                setSelectedOpportunity(updatedOpportunity);
+              }}
+            />
+          )}
           {/* Other sections placeholder */}
-          {activeSection !== 'dashboard' && activeSection !== 'leads' && activeSection !== 'contacts' && activeSection !== 'accounts' && (
+          {activeSection !== 'dashboard' && activeSection !== 'leads' && activeSection !== 'contacts' && activeSection !== 'accounts' && activeSection !== 'deals' && (
             <div style={styles.card}>
               <h3 style={styles.cardTitle}>
                 {navItems.find(item => item.id === activeSection)?.label} Section
