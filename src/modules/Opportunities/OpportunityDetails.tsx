@@ -1,13 +1,12 @@
 import React, { useState, useCallback } from 'react';
-import { 
-  Building, 
-  User, 
+import {
+  Building,
+  User,
   CheckCircle,
   Paperclip,
   Clock,
   UserPlus,
   Plus,
-  Calendar,
   ArrowUpDown,
   ArrowLeft,
   X,
@@ -47,8 +46,7 @@ interface OpportunityDetailsProps {
 
 const OpportunityDetails: React.FC<OpportunityDetailsProps> = ({ opportunity, onBack, onSave }) => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [currentStage, setCurrentStage] = useState(opportunity.stage);
-  
+
   // Task management state
   const [tasks, setTasks] = useState([
     {

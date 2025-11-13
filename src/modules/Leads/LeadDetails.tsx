@@ -47,8 +47,7 @@ interface LeadDetailsProps {
 
 const LeadDetails: React.FC<LeadDetailsProps> = ({ lead, onBack, onSave }) => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [currentStage, setCurrentStage] = useState(lead.status);
-  
+
   // Task management state
   const [tasks, setTasks] = useState([
     {

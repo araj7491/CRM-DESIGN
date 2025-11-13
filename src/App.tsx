@@ -46,7 +46,6 @@ import {
   CheckSquare,
   Calendar as CalendarIcon,
   Mail as MailIcon,
-  FileText as FileIcon,
   MoreVertical,
   ArrowUp,
   ArrowDown,

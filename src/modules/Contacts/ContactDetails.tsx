@@ -1,30 +1,20 @@
-import React, { useState, useCallback } from 'react';
-import { 
-  Building, 
-  User, 
+import React, { useState } from 'react';
+import {
+  Building,
+  User,
   CheckCircle,
   Paperclip,
   Clock,
   UserPlus,
   Plus,
-  Calendar,
   ArrowUpDown,
   X,
-  Upload,
   Edit2,
   Check,
   Phone,
   Mail,
   FileText,
-  UserCheck,
   Video,
-  Bold,
-  Italic,
-  Underline,
-  Link,
-  List,
-  Image,
-  Maximize2,
   HeartHandshake
 } from 'lucide-react';
 
@@ -88,9 +78,6 @@ const ContactDetails: React.FC<ContactDetailsProps> = ({ contact, onBack, onSave
   
   const [taskSortBy, setTaskSortBy] = useState('deadline');
   const [taskSortDirection, setTaskSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [showAttachmentModal, setShowAttachmentModal] = useState(false);
-  const [showLogEmailModal, setShowLogEmailModal] = useState(false);
-  const [showCreateEmailModal, setShowCreateEmailModal] = useState(false);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState('');
   const [hoveredField, setHoveredField] = useState<string | null>(null);
@@ -114,21 +101,6 @@ const ContactDetails: React.FC<ContactDetailsProps> = ({ contact, onBack, onSave
     'Description': 'High-potential contact from technology sector. Interested in enterprise solutions and has budget approval authority. Previous interactions have been positive and they\'ve expressed strong interest in our services.'
   });
   
-  // Email form states
-  const [logEmailForm, setLogEmailForm] = useState({
-    subject: '',
-    body: '',
-    sentDate: new Date().toISOString().split('T')[0],
-    type: 'outbound'
-  });
-  
-  const [createEmailForm, setCreateEmailForm] = useState({
-    to: contact.email,
-    subject: '',
-    body: '',
-    createTask: false,
-    taskType: 'Follow Up'
-  });
 
 
   const tabs = [
@@ -219,44 +191,6 @@ const ContactDetails: React.FC<ContactDetailsProps> = ({ contact, onBack, onSave
     }
   };
 
-  const handleLogEmailFormChange = (field: string, value: string) => {
-    setLogEmailForm(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleCreateEmailFormChange = (field: string, value: string | boolean) => {
-    setCreateEmailForm(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleLogEmailSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Log email:', logEmailForm);
-    setShowLogEmailModal(false);
-    setLogEmailForm({
-      subject: '',
-      body: '',
-      sentDate: new Date().toISOString().split('T')[0],
-      type: 'outbound'
-    });
-  };
-
-  const handleCreateEmailSubmit = () => {
-    console.log('Create email:', createEmailForm);
-    setShowCreateEmailModal(false);
-    setCreateEmailForm({
-      to: contact.email,
-      subject: '',
-      body: '',
-      createTask: false,
-      taskType: 'Follow Up'
-    });
-  };
-
   const handleFieldEdit = (fieldName: string) => {
     setEditingField(fieldName);
     setEditingValue(fieldValues[fieldName as keyof typeof fieldValues] || '');
@@ -278,16 +212,6 @@ const ContactDetails: React.FC<ContactDetailsProps> = ({ contact, onBack, onSave
 
   const handleFieldHover = (fieldKey: string | null) => {
     setHoveredField(fieldKey);
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleFieldSave(editingField!, editingValue);
-    }
-    if (e.key === 'Escape') {
-      handleFieldCancel();
-    }
   };
 
   const styles = {
@@ -1175,11 +1099,7 @@ const ContactDetails: React.FC<ContactDetailsProps> = ({ contact, onBack, onSave
                   (e.target as HTMLElement).style.borderColor = '#d1d5db';
                 }}
                 onClick={() => {
-                  if (secondaryAction === 'Create Email') {
-                    setShowCreateEmailModal(true);
-                  } else {
-                    console.log(`${secondaryAction} clicked`);
-                  }
+                  console.log(`${secondaryAction} clicked`);
                 }}
               >
                 <Plus size={12} />
@@ -1194,11 +1114,7 @@ const ContactDetails: React.FC<ContactDetailsProps> = ({ contact, onBack, onSave
                   (e.target as HTMLElement).style.backgroundColor = '#2563eb';
                 }}
                 onClick={() => {
-                  if (primaryAction === 'Log Email') {
-                    setShowLogEmailModal(true);
-                  } else {
-                    console.log(`${primaryAction} clicked`);
-                  }
+                  console.log(`${primaryAction} clicked`);
                 }}
               >
                 <FileText size={12} />

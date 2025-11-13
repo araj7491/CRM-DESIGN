@@ -1,30 +1,14 @@
-import React, { useState, useCallback } from 'react';
-import { 
-  Building, 
-  User, 
+import React, { useState } from 'react';
+import {
+  Building,
+  User,
   CheckCircle,
   Paperclip,
   Clock,
-  UserPlus,
   Plus,
-  Calendar,
-  ArrowUpDown,
-  X,
-  Upload,
-  Edit2,
-  Check,
   Phone,
   Mail,
-  FileText,
-  UserCheck,
   Video,
-  Bold,
-  Italic,
-  Underline,
-  Link,
-  List,
-  Image,
-  Maximize2,
   Target,
   Users
 } from 'lucide-react';
@@ -49,7 +33,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = ({ account, onBack, onSave
   const [activeTab, setActiveTab] = useState('overview');
   
   // Task management state
-  const [tasks, setTasks] = useState([
+  const [tasks] = useState([
     {
       id: 1,
       title: 'Follow up call',
@@ -69,16 +53,6 @@ const AccountDetails: React.FC<AccountDetailsProps> = ({ account, onBack, onSave
       createdDate: '2024-01-14'
     }
   ]);
-  
-  const [showTaskForm, setShowTaskForm] = useState(false);
-  const [taskForm, setTaskForm] = useState({
-    title: '',
-    description: '',
-    deadline: '',
-    priority: 'medium'
-  });
-  
-  const [taskSortBy, setTaskSortBy] = useState('deadline');
 
   // Sample opportunities data
   const [opportunities] = useState([
@@ -263,10 +237,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = ({ account, onBack, onSave
     <div style={styles.tabContent}>
       <div style={styles.tabHeader}>
         <h3 style={styles.tabTitle}>Tasks</h3>
-        <button 
-          style={styles.addButton}
-          onClick={() => setShowTaskForm(true)}
-        >
+        <button style={styles.addButton}>
           <Plus size={16} />
           Add Task
         </button>
