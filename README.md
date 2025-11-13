@@ -3,6 +3,8 @@
 ## Overview
 CRM-DESIGN is a modern Customer Relationship Management (CRM) application designed to streamline business processes and enhance customer engagement. Built with React and TypeScript, it provides a scalable foundation for managing contacts, sales, and communications.
 
+## Live Link (https://crm-design-sley.vercel.app/)
+
 ## Features
 - Modern React (TypeScript) architecture
 - Modular and scalable project structure
